@@ -15,7 +15,7 @@ Currently, it only focuses on the fitness of the website [https://minesweeper-pr
 ## Requirements
 
 - Java 8 or above
-- A standard Minesweeper game running on your screen (any version with consistent visual layout)
+- A standard Minesweeper game running on your screen (any version with a consistent visual layout)
 - Desktop environment (not headless)
 
 ## How to Use
@@ -58,12 +58,8 @@ Analyzing current board state...
 
 - Add support for different Minesweeper themes and resolutions.
 - Improve OCR accuracy for mine counter detection.
-- Add GUI for visualization of analysis results.
+- Add a GUI for visualization of analysis results.
 - Support direct interaction with the game (auto-play).
-
-## License
-
-MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
