@@ -95,7 +95,7 @@ public class MinesweeperScanner {
     }
 
     public static ArrayList<ArrayList<int[]>> find_equal_color_blocks(int map[][][], int width_l, int width_r, int height_l, int height_r, int colors[][]) {
-        assert colors != null && colors.length == 3;
+        assert colors != null && colors[0] != null && colors[0].length == 3;
         assert map != null && map.length > 0 && map[0] != null && map[0].length > 0 && map[0][0] != null && map[0][0].length == 3;
         assert width_l >= 0 && width_r >= 0 && height_l >= 0 && height_r >= 0;
         assert width_l < map.length && width_r <= map.length && height_l < map[0].length && height_r <= map[0].length;
@@ -114,7 +114,7 @@ public class MinesweeperScanner {
     }
 
     public static ArrayList<ArrayList<int[]>> find_similar_color_blocks(int map[][][], int width_l, int width_r, int height_l, int height_r, int colors[][]) {
-        assert colors != null && colors.length == 3;
+        assert colors != null && colors[0] != null && colors[0].length == 3;
         assert map != null && map.length > 0 && map[0] != null && map[0].length > 0 && map[0][0] != null && map[0][0].length == 3;
         assert width_l >= 0 && width_r >= 0 && height_l >= 0 && height_r >= 0;
         assert width_l < map.length && width_r <= map.length && height_l < map[0].length && height_r <= map[0].length;
