@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class MinesweeperState {
     public static final char UNKNOWN = '*';
-    public static final char MINE_FLAG = 'M';
+    public static final char MINE_FLAG = '.';
     public static final char BLANK = '0';
     public static final char ONE = '1';
     public static final char TWO = '2';
