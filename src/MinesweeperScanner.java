@@ -28,13 +28,16 @@ public class MinesweeperScanner {
         return rgb_1[0] == rgb_2[0] && rgb_1[1] == rgb_2[1] && rgb_1[2] == rgb_2[2];
     }
 
-    public static boolean rgb_similar(int rgb_1[], int rgb_2[], double threshold) {
+    public static double rgb_distance(int rgb_1[], int rgb_2[]) {
         int R = rgb_1[0] - rgb_2[0];
         int G = rgb_1[1] - rgb_2[1];
         int B = rgb_1[2] - rgb_2[2];
         double rmean = (rgb_1[0] + rgb_2[0]) / 2.0;
-        double distance = Math.sqrt((2 + rmean / 256) * (R * R) + 4 * (G * G) + (2 + (255 - rmean) / 256) * (B * B));
-        return distance <= threshold;
+        return Math.sqrt((2 + rmean / 256) * (R * R) + 4 * (G * G) + (2 + (255 - rmean) / 256) * (B * B));
+    }
+
+    public static boolean rgb_similar(int rgb_1[], int rgb_2[], double threshold) {
+        return rgb_distance(rgb_1, rgb_2) <= threshold;
     }
 
     public static boolean rgb_equal_to_any(int rgb[], int colors[][]) {
