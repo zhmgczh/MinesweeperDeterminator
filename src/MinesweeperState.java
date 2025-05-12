@@ -1,9 +1,12 @@
 import java.util.ArrayList;
 
 public class MinesweeperState {
-    public static final char UNKNOWN = '*';
-    public static final char MINE_FLAG = '.';
-    public static final char BLANK = '0';
+    public static final char BLANK = '*';
+    public static final char QUESTION_MARK = '?';
+    public static final char MINE_FLAG = 'F';
+    public static final char MINE_EXPLODED = 'X';
+    public static final char MINE_UNFOUND = 'U';
+    public static final char ZERO = '0';
     public static final char ONE = '1';
     public static final char TWO = '2';
     public static final char THREE = '3';
@@ -12,8 +15,10 @@ public class MinesweeperState {
     public static final char SIX = '6';
     public static final char SEVEN = '7';
     public static final char EIGHT = '8';
-    static final char oprerands[] = {UNKNOWN, BLANK, MINE_FLAG, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT};
+    static final char oprerands[] = {BLANK, QUESTION_MARK, MINE_FLAG, MINE_EXPLODED, MINE_UNFOUND, ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT};
+    static final String image_names[] = {"blank", "question_mark", "mine_flag", "mine_exploded", "mine_unfound", "mine_0", "mine_1", "mine_2", "mine_3", "mine_4", "mine_5", "mine_6", "mine_7", "mine_8"};
     static final int neighborhood[][] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 0}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+    static int images[][][][];
     public int time_passed, remaining_mines, nrows, ncols;
     public char map[][];
 
@@ -27,11 +32,11 @@ public class MinesweeperState {
     }
 
     public boolean is_number(char c) {
-        return c >= ONE && c <= EIGHT;
+        return c >= ZERO && c <= EIGHT;
     }
 
     public int to_number(char c) {
-        assert BLANK == c || is_number(c);
+        assert is_number(c);
         return c - '0';
     }
 

@@ -7,30 +7,28 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class ScreenCapture {
     public static BufferedImage load_image_from_file(String file_path) {
         BufferedImage image = null;
-        try {
-            File file = new File(file_path);
-            image = ImageIO.read(file);
+        try (InputStream is = ScreenCapture.class.getResourceAsStream(file_path)) {
+            assert is != null;
+            image = ImageIO.read(is);
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            return null;
         }
         return image;
     }
 
-    public static ScreenData convert_image_to_screen(BufferedImage image) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-        int packed_pixels[] = new int[width * height];
-        image.getRGB(0, 0, width, height, packed_pixels, 0, width);
-        int rgb_array[][][] = new int[width][height][3];
-        for (int i = 0; i < width; ++i) {
-            for (int j = 0; j < height; ++j) {
-                int pixel = packed_pixels[j * width + i];
+    public static int[][][] convert_image_to_rgb_array(BufferedImage image) {
+        int packed_pixels[] = new int[image.getWidth() * image.getHeight()];
+        image.getRGB(0, 0, image.getWidth(), image.getHeight(), packed_pixels, 0, image.getWidth());
+        int rgb_array[][][] = new int[image.getWidth()][image.getHeight()][3];
+        for (int i = 0; i < image.getWidth(); ++i) {
+            for (int j = 0; j < image.getHeight(); ++j) {
+                int pixel = packed_pixels[j * image.getWidth() + i];
                 int red = (pixel >> 16) & 0xff;
                 int green = (pixel >> 8) & 0xff;
                 int blue = pixel & 0xff;
@@ -39,11 +37,16 @@ public class ScreenCapture {
                 rgb_array[i][j][2] = blue;
             }
         }
-        return new ScreenData(width, height, rgb_array);
+        return rgb_array;
+    }
+
+    public static ScreenData convert_image_to_screen(BufferedImage image) {
+        return new ScreenData(image.getWidth(), image.getHeight(), convert_image_to_rgb_array(image));
     }
 
     public static ScreenData load_screen_from_file(String file_path) {
         BufferedImage image = load_image_from_file(file_path);
+        assert image != null;
         return convert_image_to_screen(image);
     }
 
@@ -77,9 +80,9 @@ public class ScreenCapture {
         return image;
     }
 
-    public static boolean save_image_to_file(BufferedImage image, String fiile_path, String format_name) {
+    public static void save_image_to_file(BufferedImage image, String fiile_path, String format_name) {
         if (image == null || fiile_path == null || format_name == null || format_name.isEmpty()) {
-            return false;
+            return;
         }
         try {
             File outputFile = new File(fiile_path);
@@ -87,16 +90,14 @@ public class ScreenCapture {
                 outputFile.getParentFile().mkdirs();
             }
             ImageIO.write(image, format_name, outputFile);
-            return true;
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
     }
 
-    public static boolean save_screen_to_file(ScreenData screen, String fiile_path, String format_name) {
+    public static void save_screen_to_file(ScreenData screen, String fiile_path, String format_name) {
         BufferedImage image = create_image_from_screen(screen);
-        return save_image_to_file(image, fiile_path, format_name);
+        save_image_to_file(image, fiile_path, format_name);
     }
 
     public static void main(String[] args) {

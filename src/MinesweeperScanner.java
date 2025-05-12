@@ -1,3 +1,4 @@
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
@@ -6,7 +7,6 @@ public class MinesweeperScanner {
     static final int neighborhood[][] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
     public static final int panel_background[][] = {{189, 189, 189}};
     public static final int digits_boards_background[][] = {{0, 0, 0}};
-    public static final int digits_color[][] = {{255, 0, 0}};
     public static final int board_border[][] = {{131, 131, 131}, {255, 255, 255}};
     public static final int split_grid_line[][] = {{130, 130, 130}};
     public static final int number_to_compute_average_grid_size = 10;
@@ -232,7 +232,7 @@ public class MinesweeperScanner {
         }
         for (int i = 0; i < map.length; ++i) {
             for (int j = 0; j < map[0].length; ++j) {
-                if (rgb_similar(screen.rgb_array[width_r - i][height_r - j], screen.rgb_array[width_r-1][height_r-1],50)) {
+                if (rgb_similar(screen.rgb_array[width_r - i][height_r - j], screen.rgb_array[width_r - 1][height_r - 1], 50)) {
                     map[i][j] = false;
                 }
             }
@@ -317,6 +317,11 @@ public class MinesweeperScanner {
         return new int[]{width_n, height_n};
     }
 
+    public static int[] find_grid_size(ScreenData screen, int board_coordinates[]) {
+        assert screen != null && MinesweeperState.images != null;
+        return null;
+    }
+
     public static int[] get_grid_coordinates(int board_coordinates[], int grid_size[], int i, int j) {
         int width_l = (int) Math.round(board_coordinates[0] + i * (board_coordinates[1] - board_coordinates[0]) / (double) grid_size[0]);
         int width_r = (int) Math.round(board_coordinates[0] + (i + 1) * (board_coordinates[1] - board_coordinates[0]) / (double) grid_size[0]);
@@ -331,10 +336,26 @@ public class MinesweeperScanner {
         return new int[]{width_l, width_r, height_l, height_r};
     }
 
+    public static void load_images_for_state()
+    {
+        if(MinesweeperState.images == null)
+        {
+            MinesweeperState.images = new int[MinesweeperState.oprerands.length][][][];
+            for(int i = 0; i < MinesweeperState.oprerands.length; ++i)
+            {
+                BufferedImage image=ScreenCapture.load_image_from_file("images/" + MinesweeperState.image_names[i] + ".png");
+                assert image != null;
+                MinesweeperState.images[i] = ScreenCapture.convert_image_to_rgb_array(image);
+            }
+        }
+    }
+
     public static MinesweeperState scan(ScreenData screen) {
+        assert screen != null;
         int panel_coordinates[] = find_panel_coordinates(screen);
         int remaining_mines_and_times_coordinates[] = find_remaining_mines_and_times_coordinates(screen, panel_coordinates);
         int board_coordinates[] = find_board_coordinates(screen, panel_coordinates);
+        load_images_for_state();
         int grid_size[] = find_grid_size_abandoned(screen, board_coordinates);
         System.out.print("Game Settings: Width: " + grid_size[0] + " Height: " + grid_size[1] + '\n');
         for (int i = 0; i < grid_size[0]; ++i) {
@@ -353,13 +374,22 @@ public class MinesweeperScanner {
         return null;
     }
 
+    public static MinesweeperState scan(ScreenData screen, int grid_size[]) {
+        assert screen != null && grid_size != null && grid_size.length == 2;
+        int panel_coordinates[] = find_panel_coordinates(screen);
+        int remaining_mines_and_times_coordinates[] = find_remaining_mines_and_times_coordinates(screen, panel_coordinates);
+        int board_coordinates[] = find_board_coordinates(screen, panel_coordinates);
+        load_images_for_state();
+        return null;
+    }
+
     public static void main(String[] args) {
-        ScreenData screen = ScreenCapture.load_screen_from_file("./test_images/empty.png");
-//        ScreenData screen = ScreenCapture.load_screen_from_file("./test_images/empty_xp.png");
-//        ScreenData screen = ScreenCapture.load_screen_from_file("./test_images/process.png");
-//        ScreenData screen = ScreenCapture.load_screen_from_file("./test_images/process_xp.png");
-//        ScreenData screen = ScreenCapture.load_screen_from_file("./test_images/final.png");
-//        ScreenData screen = ScreenCapture.load_screen_from_file("./test_images/final_xp.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty.png");
+        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty_xp.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process_xp.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final_xp.png");
         MinesweeperState state = scan(screen);
     }
 }
