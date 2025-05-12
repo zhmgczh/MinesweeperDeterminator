@@ -10,7 +10,19 @@ public class MinesweeperScanner {
     public static final int board_border[][] = {{131, 131, 131}, {255, 255, 255}};
     public static final int split_grid_line[][] = {{130, 130, 130}};
     public static final int number_to_compute_average_grid_size = 10;
-    static int grid_size[];
+    int grid_size[];
+
+    public MinesweeperScanner(int width, int height) {
+        grid_size = new int[]{width, height};
+    }
+
+    public MinesweeperScanner(int grid_size[]) {
+        assert grid_size != null && grid_size.length == 2;
+        this.grid_size = grid_size;
+    }
+
+    public MinesweeperScanner() {
+    }
 
     public static boolean rgb_equal(int rgb_1[], int rgb_2[]) {
         return rgb_1[0] == rgb_2[0] && rgb_1[1] == rgb_2[1] && rgb_1[2] == rgb_2[2];
@@ -348,7 +360,7 @@ public class MinesweeperScanner {
         }
     }
 
-    public static MinesweeperState scan(ScreenData screen) {
+    public MinesweeperState scan(ScreenData screen) {
         assert screen != null;
         int panel_coordinates[] = find_panel_coordinates(screen);
         int remaining_mines_and_times_coordinates[] = find_remaining_mines_and_time_coordinates(screen, panel_coordinates);
@@ -376,11 +388,12 @@ public class MinesweeperScanner {
 
     public static void main(String[] args) {
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty.png");
-        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty_xp.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty_xp.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process.png");
-//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process_xp.png");
+        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process_xp.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final_xp.png");
-        MinesweeperState state = scan(screen);
+        MinesweeperScanner scanner = new MinesweeperScanner();
+        MinesweeperState state = scanner.scan(screen);
     }
 }
