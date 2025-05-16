@@ -1,7 +1,5 @@
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Stack;
+import java.util.*;
 
 public class MinesweeperScanner {
     static final int neighborhood[][] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
@@ -13,11 +11,12 @@ public class MinesweeperScanner {
     int grid_size[];
 
     public MinesweeperScanner(int width, int height) {
+        assert width > 0 && height > 0;
         grid_size = new int[]{width, height};
     }
 
     public MinesweeperScanner(int grid_size[]) {
-        assert grid_size != null && grid_size.length == 2;
+        assert grid_size != null && grid_size.length == 2 && grid_size[0] > 0 && grid_size[1] > 0;
         this.grid_size = grid_size;
     }
 
@@ -36,8 +35,54 @@ public class MinesweeperScanner {
         return Math.sqrt((2 + rmean / 256) * (R * R) + 4 * (G * G) + (2 + (255 - rmean) / 256) * (B * B));
     }
 
+    public static double rgb_distance_abandoned(int rgb_1[], int rgb_2[]) {
+        int diff_r = rgb_1[0] - rgb_2[0];
+        int diff_g = rgb_1[1] - rgb_2[1];
+        int diff_b = rgb_1[2] - rgb_2[2];
+        return Math.sqrt(diff_r * diff_r + diff_g * diff_g + diff_b * diff_b);
+    }
+
     public static boolean rgb_similar(int rgb_1[], int rgb_2[], double threshold) {
         return rgb_distance(rgb_1, rgb_2) <= threshold;
+    }
+
+    public static int[] get_corresponding_position(int i, int j, int width, int height, int new_width, int new_height) {
+        assert height > 0 && width > 0 && new_height > 0 && new_width > 0;
+        int new_i = (int) Math.round(i * new_width / (double) width);
+        if (new_i == new_width) {
+            --new_i;
+        }
+        int new_j = (int) Math.round(j * new_height / (double) height);
+        if (new_j == new_height) {
+            --new_j;
+        }
+        return new int[]{new_i, new_j};
+    }
+
+    public static double picture_average_distance_sorted(int big_picture[][][], int small_picture[][][]) {
+        assert big_picture != null && small_picture != null && big_picture.length > 0 && small_picture.length > 0;
+        assert big_picture[0].length > 0 && small_picture[0].length > 0;
+        assert 3 == big_picture[0][0].length && 3 == small_picture[0][0].length;
+        assert big_picture.length * big_picture[0].length >= small_picture.length * small_picture[0].length;
+        double sum = 0;
+        for (int i = 0; i < big_picture.length; ++i) {
+            for (int j = 0; j < big_picture[0].length; ++j) {
+                int corresponding_position[] = get_corresponding_position(i, j, big_picture.length, big_picture[0].length, small_picture.length, small_picture[0].length);
+                sum += rgb_distance(big_picture[i][j], small_picture[corresponding_position[0]][corresponding_position[1]]);
+            }
+        }
+        return sum / (big_picture.length * big_picture[0].length);
+    }
+
+    public static double picture_average_distance(int picture_1[][][], int picture_2[][][]) {
+        assert picture_1 != null && picture_2 != null && picture_1.length > 0 && picture_2.length > 0;
+        assert picture_1[0].length > 0 && picture_2[0].length > 0;
+        assert 3 == picture_1[0][0].length && 3 == picture_2[0][0].length;
+        if (picture_1.length * picture_1[0].length >= picture_2.length * picture_2[0].length) {
+            return picture_average_distance_sorted(picture_1, picture_2);
+        } else {
+            return picture_average_distance_sorted(picture_2, picture_1);
+        }
     }
 
     public static boolean rgb_equal_to_any(int rgb[], int colors[][]) {
@@ -333,9 +378,111 @@ public class MinesweeperScanner {
         return new int[]{width_n, height_n};
     }
 
+    public static int[][][] extract_picture_slice(int[][][] original_array, int row_start, int row_end, int col_start, int col_end) {
+        assert original_array != null && original_array.length > 0;
+        assert original_array[0] != null && original_array[0].length > 0;
+        assert original_array[0][0] != null && 3 == original_array[0][0].length;
+        int new_rows = row_end - row_start;
+        int new_cols = col_end - col_start;
+        int[][][] sub_array = new int[new_rows][new_cols][3];
+        for (int i = row_start; i < row_end; i++) {
+            System.arraycopy(original_array[i], col_start, sub_array[i - row_start], 0, new_cols);
+        }
+        return sub_array;
+    }
+
     public static int[] find_grid_size(ScreenData screen, int board_coordinates[]) {
         assert screen != null && MinesweeperState.images != null;
-        return null;
+        int least_side_length = Math.min(board_coordinates[1] - board_coordinates[0] + 1, board_coordinates[3] - board_coordinates[2] + 1);
+        Set<Integer> side_lengths = new HashSet<>();
+        for (int i = 1; i <= least_side_length; ++i) {
+            int side_length = (int) Math.round(least_side_length / (double) i);
+            if (side_length > 10) {
+                side_lengths.add(side_length);
+            }
+        }
+        int optimal_side_length = 1;
+        double min_average_distance = Double.MAX_VALUE;
+        for (int side_length : side_lengths) {
+            int width = (board_coordinates[1] - board_coordinates[0]) / side_length;
+            int height = (board_coordinates[3] - board_coordinates[2]) / side_length;
+            double distance_sum = 0;
+            for (int k = 0; k < width; ++k) {
+                for (int l = 0; l < height; ++l) {
+                    double min_distance = Double.MAX_VALUE;
+                    for (int i = 0; i < MinesweeperState.images.length; ++i) {
+                        int slice[][][] = extract_picture_slice(screen.rgb_array, board_coordinates[0] + side_length * k, board_coordinates[0] + side_length * (k + 1), board_coordinates[2] + side_length * l, board_coordinates[2] + side_length * (l + 1));
+                        double distance = picture_average_distance(slice, MinesweeperState.images[i]);
+                        if (distance < min_distance) {
+                            min_distance = distance;
+                        }
+                    }
+                    distance_sum += min_distance;
+                }
+            }
+            double average_distance = distance_sum / (width * height);
+            if (average_distance < min_average_distance) {
+                optimal_side_length = side_length;
+                min_average_distance = average_distance;
+            }
+        }
+        int width_n = (int) Math.round((board_coordinates[1] - board_coordinates[0]) / (double) optimal_side_length);
+        int height_n = (int) Math.round((board_coordinates[3] - board_coordinates[2]) / (double) optimal_side_length);
+        return new int[]{width_n, height_n};
+    }
+
+    public static char[][] get_map(ScreenData screen, int board_coordinates[], int grid_size[]) {
+        assert screen != null && MinesweeperState.images != null && grid_size != null;
+        assert 2 == grid_size.length;
+        int side_length = (int) Math.round(
+                (((board_coordinates[1] - board_coordinates[0]) / (double) grid_size[0]) +
+                        (board_coordinates[3] - board_coordinates[2]) / (double) grid_size[1])
+                        / 2.0);
+        char map[][] = new char[grid_size[0]][grid_size[1]];
+        for (int k = 0; k < grid_size[0]; ++k) {
+            for (int l = 0; l < grid_size[1]; ++l) {
+                double min_distance = Double.MAX_VALUE;
+                for (int i = 0; i < MinesweeperState.images.length; ++i) {
+                    int grid_coordinates[] = get_grid_coordinates(board_coordinates, grid_size, k, l);
+                    int slice[][][] = extract_picture_slice(screen.rgb_array,
+                            grid_coordinates[0], grid_coordinates[1], grid_coordinates[2], grid_coordinates[3]);
+                    double distance = picture_average_distance(slice, MinesweeperState.images[i]);
+                    if (distance < min_distance) {
+                        min_distance = distance;
+                        map[k][l] = MinesweeperState.operands[i];
+                    }
+                }
+            }
+        }
+        return map;
+    }
+
+    public static int[] get_digits(ScreenData screen, int width_l, int width_r, int height_l, int height_r, int number_of_digits) {
+        assert MinesweeperState.digits != null && screen != null;
+        int digits[] = new int[3];
+        int side_length = (width_r - width_l) / number_of_digits;
+        for (int i = 0; i < number_of_digits; ++i) {
+            int slice[][][] = extract_picture_slice(screen.rgb_array, width_l + i * side_length, width_l + (i + 1) * side_length, height_l, height_r);
+            double min_distance = Double.MAX_VALUE;
+            for (int j = 0; j < MinesweeperState.digits.length; ++j) {
+                double distance = picture_average_distance(slice, MinesweeperState.digits[j]);
+                if (distance < min_distance) {
+                    min_distance = distance;
+                    digits[i] = j;
+                }
+            }
+        }
+        return digits;
+    }
+
+    public int convert_digits_to_integer(int digits[]) {
+        assert digits != null;
+        int integer = 0;
+        for (int i = 0; i < digits.length; ++i) {
+            integer *= 10;
+            integer += digits[i];
+        }
+        return integer;
     }
 
     public static int[] get_grid_coordinates(int board_coordinates[], int grid_size[], int i, int j) {
@@ -354,11 +501,22 @@ public class MinesweeperScanner {
 
     public static void load_images_for_state() {
         if (MinesweeperState.images == null) {
-            MinesweeperState.images = new int[MinesweeperState.oprerands.length][][][];
-            for (int i = 0; i < MinesweeperState.oprerands.length; ++i) {
+            MinesweeperState.images = new int[MinesweeperState.operands.length][][][];
+            for (int i = 0; i < MinesweeperState.operands.length; ++i) {
                 BufferedImage image = ScreenCapture.load_image_from_file("images/" + MinesweeperState.image_names[i] + ".png");
                 assert image != null;
                 MinesweeperState.images[i] = ScreenCapture.convert_image_to_rgb_array(image);
+            }
+        }
+    }
+
+    public static void load_digits_for_state() {
+        if (MinesweeperState.digits == null) {
+            MinesweeperState.digits = new int[MinesweeperState.digit_names.length][][][];
+            for (int i = 0; i < MinesweeperState.digit_names.length; ++i) {
+                BufferedImage digit = ScreenCapture.load_image_from_file("images/" + MinesweeperState.digit_names[i] + ".png");
+                assert digit != null;
+                MinesweeperState.digits[i] = ScreenCapture.convert_image_to_rgb_array(digit);
             }
         }
     }
@@ -367,36 +525,39 @@ public class MinesweeperScanner {
         assert screen != null;
         int panel_coordinates[] = find_panel_coordinates(screen);
         int remaining_mines_and_times_coordinates[] = find_remaining_mines_and_time_coordinates(screen, panel_coordinates);
+        load_digits_for_state();
+        int remaining_mines = convert_digits_to_integer(get_digits(screen,
+                remaining_mines_and_times_coordinates[0],
+                remaining_mines_and_times_coordinates[1],
+                remaining_mines_and_times_coordinates[2],
+                remaining_mines_and_times_coordinates[3],
+                3));
+        int time_passed = convert_digits_to_integer(get_digits(screen,
+                remaining_mines_and_times_coordinates[4],
+                remaining_mines_and_times_coordinates[5],
+                remaining_mines_and_times_coordinates[6],
+                remaining_mines_and_times_coordinates[7],
+                3));
         int board_coordinates[] = find_board_coordinates(screen, panel_coordinates);
         load_images_for_state();
         if (null == grid_size) {
-            grid_size = find_grid_size_abandoned(screen, board_coordinates);
+            grid_size = find_grid_size(screen, board_coordinates);
             System.out.print("Game Settings: Width: " + grid_size[0] + " Height: " + grid_size[1] + '\n');
         }
-        for (int i = 0; i < grid_size[0]; ++i) {
-            for (int j = 0; j < grid_size[1]; ++j) {
-                if ((i + j) % 2 == 1) {
-                    int grid_coordinates[] = get_grid_coordinates(board_coordinates, grid_size, i, j);
-                    for (int k = grid_coordinates[0]; k <= grid_coordinates[1]; ++k) {
-                        for (int l = grid_coordinates[2]; l <= grid_coordinates[3]; ++l) {
-                            screen.rgb_array[k][l] = new int[]{166, 0, 255};
-                        }
-                    }
-                }
-            }
-        }
-        ScreenCapture.save_screen_to_file(screen, "screen.png", "png");
-        return null;
+        char map[][] = get_map(screen, board_coordinates, grid_size);
+        return new MinesweeperState(time_passed, remaining_mines, map);
     }
 
     public static void main(String[] args) {
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty_xp.png");
-//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process.png");
-        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process_xp.png");
+        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process_xp.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final_xp.png");
+        ScreenCapture.save_screen_to_file(screen, "screen.png", "png");
         MinesweeperScanner scanner = new MinesweeperScanner();
         MinesweeperState state = scanner.scan(screen);
+        System.out.println(state);
     }
 }
