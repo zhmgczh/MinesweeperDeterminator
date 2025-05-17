@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import java.awt.image.BufferedImage;
 
 public class MinesweeperState {
     public static final char BLANK = '*';
@@ -23,9 +23,50 @@ public class MinesweeperState {
     static final String digit_names[] = {"digit_0", "digit_1", "digit_2", "digit_3", "digit_4", "digit_5", "digit_6", "digit_7", "digit_8", "digit_9"};
     static final int neighborhood[][] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 0}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
     static int images[][][][];
+    static double image_rgb_centroids[][];
     static int digits[][][][];
     public int time_passed, remaining_mines, nrows, ncols;
     public char map[][];
+
+    static {
+        load_images();
+        load_digits();
+    }
+
+    private static void load_images() {
+        if (null == images || null == image_rgb_centroids) {
+            images = new int[operands.length][][][];
+            image_rgb_centroids = new double[operands.length][];
+            for (int i = 0; i < operands.length; ++i) {
+                BufferedImage image = ScreenCapture.load_image_from_file("images/" + image_names[i] + ".png");
+                assert image != null;
+                images[i] = ScreenCapture.convert_image_to_rgb_array(image);
+                image_rgb_centroids[i] = RGB.rgb_image_centroid_circle(images[i]);
+            }
+        }
+    }
+
+    private static void load_digits() {
+        if (null == digits) {
+            digits = new int[digit_names.length][][][];
+            for (int i = 0; i < digit_names.length; ++i) {
+                BufferedImage digit = ScreenCapture.load_image_from_file("images/" + digit_names[i] + ".png");
+                assert digit != null;
+                digits[i] = ScreenCapture.convert_image_to_rgb_array(digit);
+            }
+        }
+    }
+
+    public MinesweeperState(int time_passed, int remaining_mines, char map[][]) {
+        assert time_passed >= 0 && time_passed <= 999 && remaining_mines >= 0;
+        assert null != map && map.length > 0 && null != map[0] && map[0].length > 0;
+        assert check_map_valid(map, false);
+        this.time_passed = time_passed;
+        this.remaining_mines = remaining_mines;
+        this.map = map;
+        this.nrows = map.length;
+        this.ncols = map[0].length;
+    }
 
     public boolean is_valid_operand(char c) {
         for (char operand : operands) {
@@ -99,17 +140,6 @@ public class MinesweeperState {
             }
         }
         return true;
-    }
-
-    public MinesweeperState(int time_passed, int remaining_mines, char map[][]) {
-        assert time_passed >= 0 && time_passed <= 999 && remaining_mines >= 0;
-        assert null != map && map.length > 0 && null != map[0] && map[0].length > 0;
-        assert check_map_valid(map, false);
-        this.time_passed = time_passed;
-        this.remaining_mines = remaining_mines;
-        this.map = map;
-        this.nrows = map.length;
-        this.ncols = map[0].length;
     }
 
     public void move(char operand, int i, int j) {
