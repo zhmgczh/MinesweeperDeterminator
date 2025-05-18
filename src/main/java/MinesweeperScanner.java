@@ -327,7 +327,7 @@ public class MinesweeperScanner {
         return digits;
     }
 
-    public int convert_digits_to_integer(int digits[]) {
+    public static int convert_digits_to_integer(int digits[]) {
         assert digits != null;
         int integer = 0;
         for (int i = 0; i < digits.length; ++i) {
@@ -376,7 +376,7 @@ public class MinesweeperScanner {
         return new MinesweeperState(time_passed, remaining_mines, map);
     }
 
-    public MinesweeperState scan(ScreenData screen) {
+    public static MinesweeperState scan(ScreenData screen) {
         assert screen != null;
         int panel_coordinates[] = find_panel_coordinates(screen);
         int remaining_mines_and_times_coordinates[] = find_remaining_mines_and_time_coordinates(screen, panel_coordinates);
@@ -405,8 +405,7 @@ public class MinesweeperScanner {
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final_xp.png");
         ScreenCapture.save_screen_to_file(screen, "screen.png", "png");
-        MinesweeperScanner scanner = new MinesweeperScanner();
-        MinesweeperState state = scanner.scan(screen);
+        MinesweeperState state = scan(screen);
         System.out.println(state);
     }
 }

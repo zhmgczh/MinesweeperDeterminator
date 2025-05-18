@@ -11,6 +11,9 @@ import java.io.InputStream;
 
 public class ScreenCapture {
     public static BufferedImage load_image_from_file(String file_path) {
+        if (file_path.charAt(0) != '/') {
+            file_path = '/' + file_path;
+        }
         BufferedImage image = null;
         try (InputStream is = ScreenCapture.class.getResourceAsStream(file_path)) {
             assert is != null;
