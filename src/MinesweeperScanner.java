@@ -277,7 +277,7 @@ public class MinesweeperScanner {
         return map;
     }
 
-    public static char[][] get_map(ScreenData screen, int board_coordinates[], int grid_size[]) {
+    public static char[][] get_map_abandoned_2(ScreenData screen, int board_coordinates[], int grid_size[]) {
         assert screen != null && MinesweeperState.images != null && grid_size != null;
         assert 4 == board_coordinates.length && 2 == grid_size.length;
         char map[][] = new char[grid_size[0]][grid_size[1]];
@@ -298,6 +298,15 @@ public class MinesweeperScanner {
             }
         }
         return map;
+    }
+
+    public static char[][] get_map(ScreenData screen, int board_coordinates[]) {
+        assert screen != null && MinesweeperState.images != null;
+        assert 4 == board_coordinates.length;
+        int board_rgb_array[][][] = extract_picture_slice(screen.rgb_array, board_coordinates[0], board_coordinates[1], board_coordinates[2], board_coordinates[3]);
+        HashMap<Character, ArrayList<int[]>> positions = OpenCV.process(board_rgb_array, MinesweeperState.operands, MinesweeperState.images);
+        System.out.println("Positions: " + OpenCV.display_positions(positions));
+        return null;
     }
 
     public static int[] get_digits(ScreenData screen, int width_l, int width_r, int height_l, int height_r, int number_of_digits) {
@@ -342,7 +351,7 @@ public class MinesweeperScanner {
         return new int[]{width_l, width_r, height_l, height_r};
     }
 
-    public MinesweeperState scan(ScreenData screen) {
+    public MinesweeperState scan_abandoned(ScreenData screen) {
         assert screen != null;
         int panel_coordinates[] = find_panel_coordinates(screen);
         int remaining_mines_and_times_coordinates[] = find_remaining_mines_and_time_coordinates(screen, panel_coordinates);
@@ -363,7 +372,28 @@ public class MinesweeperScanner {
             grid_size = find_grid_size(screen, board_coordinates);
             System.out.print("Game Settings: Width: " + grid_size[0] + " Height: " + grid_size[1] + '\n');
         }
-        char map[][] = get_map(screen, board_coordinates, grid_size);
+        char map[][] = get_map_abandoned(screen, board_coordinates, grid_size);
+        return new MinesweeperState(time_passed, remaining_mines, map);
+    }
+
+    public MinesweeperState scan(ScreenData screen) {
+        assert screen != null;
+        int panel_coordinates[] = find_panel_coordinates(screen);
+        int remaining_mines_and_times_coordinates[] = find_remaining_mines_and_time_coordinates(screen, panel_coordinates);
+        int remaining_mines = convert_digits_to_integer(get_digits(screen,
+                remaining_mines_and_times_coordinates[0],
+                remaining_mines_and_times_coordinates[1],
+                remaining_mines_and_times_coordinates[2],
+                remaining_mines_and_times_coordinates[3],
+                3));
+        int time_passed = convert_digits_to_integer(get_digits(screen,
+                remaining_mines_and_times_coordinates[4],
+                remaining_mines_and_times_coordinates[5],
+                remaining_mines_and_times_coordinates[6],
+                remaining_mines_and_times_coordinates[7],
+                3));
+        int board_coordinates[] = find_board_coordinates(screen, panel_coordinates);
+        char map[][] = get_map(screen, board_coordinates);
         return new MinesweeperState(time_passed, remaining_mines, map);
     }
 
