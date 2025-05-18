@@ -26,10 +26,10 @@ Currently, it only focuses on the fitness of the website [https://minesweeper-pr
    cd MinesweeperDeterminator
    ```
 
-2. Compile and run the project:
+2. Run the project:
    ```bash
-   javac -d bin src/*.java
-   java -cp bin Main
+   cd target
+   java -jar minesweeper-determinator-1.0-SNAPSHOT.jar
    ```
 
 3. Make sure the Minesweeper window is visible on your screen when running the program.
