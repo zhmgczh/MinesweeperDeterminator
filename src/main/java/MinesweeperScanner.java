@@ -304,7 +304,8 @@ public class MinesweeperScanner {
         assert screen != null && MinesweeperState.images != null;
         assert 4 == board_coordinates.length;
         int board_rgb_array[][][] = extract_picture_slice(screen.rgb_array, board_coordinates[0], board_coordinates[1], board_coordinates[2], board_coordinates[3]);
-        HashMap<Character, ArrayList<int[]>> positions = OpenCV.process(board_rgb_array, MinesweeperState.operands, MinesweeperState.images);
+        ScreenCapture.save_array_to_file(board_rgb_array, "board_rgb_array.png", "png");
+        HashMap<Character, ArrayList<int[]>> positions = OpenCV.process(board_rgb_array);
         System.out.println("Positions: " + OpenCV.display_positions(positions));
         return null;
     }

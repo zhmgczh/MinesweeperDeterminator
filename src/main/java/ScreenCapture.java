@@ -67,12 +67,18 @@ public class ScreenCapture {
     }
 
     public static BufferedImage create_image_from_screen(ScreenData screen) {
-        BufferedImage image = new BufferedImage(screen.width, screen.height, BufferedImage.TYPE_INT_RGB);
-        for (int x = 0; x < screen.width; ++x) {
-            for (int y = 0; y < screen.height; ++y) {
-                int r = screen.rgb_array[x][y][0];
-                int g = screen.rgb_array[x][y][1];
-                int b = screen.rgb_array[x][y][2];
+        return create_image_from_array(screen.rgb_array);
+    }
+
+    public static BufferedImage create_image_from_array(int rgb_array[][][]) {
+        assert rgb_array != null && rgb_array.length > 0 && rgb_array[0] != null && rgb_array[0].length > 0;
+        assert rgb_array[0][0] != null && 3 == rgb_array[0][0].length;
+        BufferedImage image = new BufferedImage(rgb_array.length, rgb_array[0].length, BufferedImage.TYPE_INT_RGB);
+        for (int x = 0; x < rgb_array.length; ++x) {
+            for (int y = 0; y < rgb_array[0].length; ++y) {
+                int r = rgb_array[x][y][0];
+                int g = rgb_array[x][y][1];
+                int b = rgb_array[x][y][2];
                 int pixel = (0xFF << 24) |
                         (r << 16) |
                         (g << 8) |
@@ -81,6 +87,13 @@ public class ScreenCapture {
             }
         }
         return image;
+    }
+
+    public static void save_array_to_file(int rgb_array[][][], String file_path, String format_name) {
+        assert rgb_array != null && rgb_array.length > 0 && rgb_array[0] != null && rgb_array[0].length > 0;
+        assert rgb_array[0][0] != null && 3 == rgb_array[0][0].length;
+        BufferedImage image = create_image_from_array(rgb_array);
+        save_image_to_file(image, file_path, format_name);
     }
 
     public static void save_image_to_file(BufferedImage image, String fiile_path, String format_name) {
@@ -99,6 +112,7 @@ public class ScreenCapture {
     }
 
     public static void save_screen_to_file(ScreenData screen, String fiile_path, String format_name) {
+        assert screen != null;
         BufferedImage image = create_image_from_screen(screen);
         save_image_to_file(image, fiile_path, format_name);
     }

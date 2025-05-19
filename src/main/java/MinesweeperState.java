@@ -41,6 +41,18 @@ public class MinesweeperState {
                 BufferedImage image = ScreenCapture.load_image_from_file("images/" + image_names[i] + ".png");
                 assert image != null;
                 images[i] = ScreenCapture.convert_image_to_rgb_array(image);
+            }
+        }
+    }
+
+    private static void load_images_abandoned() {
+        if (null == images || null == image_rgb_centroids) {
+            images = new int[operands.length][][][];
+            image_rgb_centroids = new double[operands.length][];
+            for (int i = 0; i < operands.length; ++i) {
+                BufferedImage image = ScreenCapture.load_image_from_file("images/" + image_names[i] + ".png");
+                assert image != null;
+                images[i] = ScreenCapture.convert_image_to_rgb_array(image);
                 image_rgb_centroids[i] = RGB.rgb_image_centroid_circle(images[i]);
             }
         }
