@@ -1,5 +1,7 @@
 # Minesweeper Determinator
 
+(Note that all content in this repository is released under the MIT license. Please carefully read the [LICENSE](LICENSE) file and properly credit the content before reusing, copying, or adapting it.)
+
 **Minesweeper Determinator** is a Java application that analyzes the screen to detect the current state of a running Minesweeper game. It determines whether the next move requires guessing or if a logical step can be taken. When guessing is not necessary, it suggests the next safe move and can probably help you click if you want.
 
 Currently, it only focuses on the fitness of the website [https://minesweeper-pro.com/](https://minesweeper-pro.com/) and the typical Minesweeper game in Windows XP.
