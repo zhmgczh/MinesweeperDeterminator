@@ -227,23 +227,25 @@ public class MinesweeperState {
         return true;
     }
 
-    private void search(int point_index) {
-        if (point_index == all_points.size()) {
-            for (int[] point : all_points) {
-                possibility_map.get(point).add(temp_map[point[0]][point[1]]);
+    private void search(int point_index, int remaining_mines) {
+        if (remaining_mines >= 0) {
+            if (point_index == all_points.size()) {
+                for (int[] point : all_points) {
+                    possibility_map.get(point).add(temp_map[point[0]][point[1]]);
+                }
+            } else {
+                int x = all_points.get(point_index)[0];
+                int y = all_points.get(point_index)[1];
+                temp_map[x][y] = ZERO;
+                if (check_position_valid(x, y)) {
+                    search(point_index + 1, remaining_mines);
+                }
+                temp_map[x][y] = MINE_FLAG;
+                if (check_position_valid(x, y)) {
+                    search(point_index + 1, remaining_mines - 1);
+                }
+                temp_map[x][y] = BLANK;
             }
-        } else {
-            int x = all_points.get(point_index)[0];
-            int y = all_points.get(point_index)[1];
-            temp_map[x][y] = ZERO;
-            if (check_position_valid(x, y)) {
-                search(point_index + 1);
-            }
-            temp_map[x][y] = MINE_FLAG;
-            if (check_position_valid(x, y)) {
-                search(point_index + 1);
-            }
-            temp_map[x][y] = BLANK;
         }
     }
 
@@ -286,7 +288,7 @@ public class MinesweeperState {
         }
         try {
             Thread.ofVirtual().start(() -> {
-                search(0);
+                search(0, remaining_mines);
             }).join();
         } catch (InterruptedException e) {
             e.printStackTrace();
