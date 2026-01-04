@@ -23,7 +23,6 @@ public class MinesweeperState {
     static final String digit_names[] = {"digit_0", "digit_1", "digit_2", "digit_3", "digit_4", "digit_5", "digit_6", "digit_7", "digit_8", "digit_9"};
     static final int neighborhood[][] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 0}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
     static int images[][][][];
-    static double image_rgb_centroids[][];
     static int digits[][][][];
     public int time_passed, remaining_mines, nrows, ncols;
     public char map[][];
@@ -34,26 +33,12 @@ public class MinesweeperState {
     }
 
     private static void load_images() {
-        if (null == images || null == image_rgb_centroids) {
+        if (null == images) {
             images = new int[operands.length][][][];
-            image_rgb_centroids = new double[operands.length][];
             for (int i = 0; i < operands.length; ++i) {
                 BufferedImage image = ScreenCapture.load_image_from_file("images/" + image_names[i] + ".png");
                 assert image != null;
                 images[i] = ScreenCapture.convert_image_to_rgb_array(image);
-            }
-        }
-    }
-
-    private static void load_images_abandoned() {
-        if (null == images || null == image_rgb_centroids) {
-            images = new int[operands.length][][][];
-            image_rgb_centroids = new double[operands.length][];
-            for (int i = 0; i < operands.length; ++i) {
-                BufferedImage image = ScreenCapture.load_image_from_file("images/" + image_names[i] + ".png");
-                assert image != null;
-                images[i] = ScreenCapture.convert_image_to_rgb_array(image);
-                image_rgb_centroids[i] = RGB.rgb_image_centroid_circle(images[i]);
             }
         }
     }
@@ -178,5 +163,34 @@ public class MinesweeperState {
             sb.append('\n');
         }
         return sb.toString();
+    }
+
+    public int[][][] get_map_rgb_array() {
+        int[][][] rgb = new int[nrows * images[0].length][ncols * images[0][0].length][3];
+        System.out.println(rgb.length + " " + rgb[0].length);
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < ncols; ++j) {
+                for (int k = 0; k < operands.length; ++k) {
+                    if (map[i][j] == operands[k]) {
+                        int base_i = i * images[0].length;
+                        int base_j = j * images[0][0].length;
+                        for (int pos_i = 0; pos_i < images[k].length; ++pos_i) {
+                            for (int pos_j = 0; pos_j < images[k][pos_i].length; ++pos_j) {
+                                rgb[base_i + pos_i][base_j + pos_j][0] = images[k][pos_i][pos_j][0];
+                                rgb[base_i + pos_i][base_j + pos_j][1] = images[k][pos_i][pos_j][1];
+                                rgb[base_i + pos_i][base_j + pos_j][2] = images[k][pos_i][pos_j][2];
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        return rgb;
+    }
+
+    public int[][][] get_map_rgb_array(int resize) {
+        int[][][] rgb = get_map_rgb_array();
+        return RGB.resize(rgb, rgb.length * resize, rgb[0].length * resize);
     }
 }

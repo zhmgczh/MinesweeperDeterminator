@@ -159,9 +159,9 @@ public class RGB {
         assert picture_1[0].length > 0 && picture_2[0].length > 0;
         assert 3 == picture_1[0][0].length && 3 == picture_2[0][0].length;
         if (picture_1.length * picture_1[0].length >= picture_2.length * picture_2[0].length) {
-            return picture_average_distance_sorted(picture_1, picture_2);
+            return picture_average_distance_sorted_circle(picture_1, picture_2);
         } else {
-            return picture_average_distance_sorted(picture_2, picture_1);
+            return picture_average_distance_sorted_circle(picture_2, picture_1);
         }
     }
 
@@ -275,5 +275,33 @@ public class RGB {
             }
         }
         return blocks;
+    }
+
+    public static int[][][] resize(int[][][] original, int newW, int newH) {
+        int oldW = original.length;
+        int oldH = original[0].length;
+        int[][][] resized = new int[newW][newH][3];
+        double widthRatio = (double) (oldW - 1) / (newW - 1);
+        double heightRatio = (double) (oldH - 1) / (newH - 1);
+        for (int i = 0; i < newW; i++) {
+            for (int j = 0; j < newH; j++) {
+                double x = i * widthRatio;
+                double y = j * heightRatio;
+                int x1 = (int) Math.floor(x);
+                int y1 = (int) Math.floor(y);
+                int x2 = Math.min(x1 + 1, oldW - 1);
+                int y2 = Math.min(y1 + 1, oldH - 1);
+                double dx = x - x1;
+                double dy = y - y1;
+                for (int c = 0; c < 3; c++) {
+                    double val = original[x1][y1][c] * (1 - dx) * (1 - dy) +
+                            original[x2][y1][c] * dx * (1 - dy) +
+                            original[x1][y2][c] * (1 - dx) * dy +
+                            original[x2][y2][c] * dx * dy;
+                    resized[i][j][c] = (int) Math.round(val);
+                }
+            }
+        }
+        return resized;
     }
 }

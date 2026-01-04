@@ -12,13 +12,6 @@
         <maven.compiler.target>22</maven.compiler.target>
     </properties>
     <packaging>jar</packaging>
-    <dependencies>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>javacv-platform</artifactId>
-            <version>1.5.11</version>
-        </dependency>
-    </dependencies>
     <build>
         <plugins>
             <plugin>
