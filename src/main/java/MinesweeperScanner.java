@@ -280,7 +280,12 @@ public class MinesweeperScanner {
         MinesweeperScanner minesweeperScanner = new MinesweeperScanner(30, 16);
         MinesweeperState state = minesweeperScanner.scan(screen, true);
         System.out.println(state);
-        System.out.println("Predictions: " + state.get_predictions());
         ScreenCapture.save_array_to_file(state.get_map_rgb_array(2), "scanned.png", "png");
+        ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
+        int index=0;
+        for (Pair<int[], Character> prediction : predictions) {
+            ScreenCapture.save_array_to_file(state.get_marked_rgb_array(prediction.getFirst()[0], prediction.getFirst()[1], prediction.getSecond(), 2), "predictions/prediction_"+index+".png", "png");
+            ++index;
+        }
     }
 }

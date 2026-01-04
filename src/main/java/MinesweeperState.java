@@ -1,8 +1,5 @@
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class MinesweeperState {
     public static final char BLANK = '*';
@@ -166,7 +163,7 @@ public class MinesweeperState {
         return sb.toString();
     }
 
-    public int[][][] get_map_rgb_array() {
+    public int[][][] get_map_rgb_array(char[][] map) {
         int[][][] rgb = new int[nrows * images[0].length][ncols * images[0][0].length][3];
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < ncols; ++j) {
@@ -189,9 +186,27 @@ public class MinesweeperState {
         return rgb;
     }
 
-    public int[][][] get_map_rgb_array(int resize) {
-        int[][][] rgb = get_map_rgb_array();
+    public int[][][] get_map_rgb_array(char[][] map, int resize) {
+        int[][][] rgb = get_map_rgb_array(map);
         return RGB.resize(rgb, rgb.length * resize, rgb[0].length * resize);
+    }
+
+    public int[][][] get_map_rgb_array(int resize) {
+        return get_map_rgb_array(map, resize);
+    }
+
+    public int[][][] get_marked_rgb_array(int x, int y, char state, int resize) {
+        char[][] new_map = new char[nrows][ncols];
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < ncols; ++j) {
+                if (i == x && j == y) {
+                    new_map[i][j] = state;
+                } else {
+                    new_map[i][j] = map[i][j];
+                }
+            }
+        }
+        return get_map_rgb_array(new_map, resize);
     }
 
     private static final int[][] unit_vectors = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
@@ -236,6 +251,7 @@ public class MinesweeperState {
         ArrayList<Pair<int[], Character>> predictions = new ArrayList<>();
         all_points = new ArrayList<>();
         HashMap<int[], Integer> point_layer = new HashMap<>();
+        boolean[][] visited = new boolean[nrows][ncols];
         for (int layer = 0; layer < layers; ++layer) {
             for (int i = 0; i < nrows; ++i) {
                 for (int j = 0; j < ncols; ++j) {
@@ -243,10 +259,11 @@ public class MinesweeperState {
                         if (is_number(map[i][j])) {
                             int new_x = i + (layer + 1) * unit_vector[0];
                             int new_y = j + (layer + 1) * unit_vector[1];
-                            if (new_x >= 0 && new_x < nrows && new_y >= 0 && new_y < ncols && (BLANK == map[new_x][new_y] || QUESTION_MARK == map[new_x][new_y])) {
+                            if (new_x >= 0 && new_x < nrows && new_y >= 0 && new_y < ncols && !visited[new_x][new_y] && (BLANK == map[new_x][new_y] || QUESTION_MARK == map[new_x][new_y])) {
                                 int[] point = new int[]{new_x, new_y};
                                 all_points.add(point);
                                 point_layer.put(point, layer);
+                                visited[new_x][new_y] = true;
                             }
                         }
                     }
