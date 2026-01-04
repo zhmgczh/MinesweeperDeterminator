@@ -195,16 +195,29 @@ public class MinesweeperState {
         return get_map_rgb_array(map, resize);
     }
 
-    public int[][][] get_marked_rgb_array(int x, int y, char state, int resize) {
+    public int[][][] get_marked_rgb_array(Pair<int[], Character> mark, int resize) {
         char[][] new_map = new char[nrows][ncols];
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < ncols; ++j) {
-                if (i == x && j == y) {
-                    new_map[i][j] = state;
+                if (i == mark.getFirst()[0] && j == mark.getFirst()[1]) {
+                    new_map[i][j] = mark.getSecond();
                 } else {
                     new_map[i][j] = map[i][j];
                 }
             }
+        }
+        return get_map_rgb_array(new_map, resize);
+    }
+
+    public int[][][] get_marked_rgb_array(ArrayList<Pair<int[], Character>> marks, int resize) {
+        char[][] new_map = new char[nrows][ncols];
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < ncols; ++j) {
+                new_map[i][j] = map[i][j];
+            }
+        }
+        for (Pair<int[], Character> mark : marks) {
+            new_map[mark.getFirst()[0]][mark.getFirst()[1]] = mark.getSecond();
         }
         return get_map_rgb_array(new_map, resize);
     }
@@ -272,26 +285,32 @@ public class MinesweeperState {
                 }
             }
         }
-        temp_map = new char[nrows][ncols];
-        for (int i = 0; i < nrows; ++i) {
-            for (int j = 0; j < ncols; ++j) {
-                if (QUESTION_MARK == map[i][j]) {
-                    temp_map[i][j] = BLANK;
-                } else {
-                    temp_map[i][j] = map[i][j];
-                }
-            }
-        }
         possibility_map = new HashMap<>();
         for (int[] point : all_points) {
             possibility_map.put(point, new HashSet<>());
         }
-        try {
-            Thread.ofVirtual().start(() -> {
-                search(0, remaining_mines);
-            }).join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (0 == remaining_mines) {
+            for (int[] point : all_points) {
+                possibility_map.get(point).add(ZERO);
+            }
+        } else {
+            temp_map = new char[nrows][ncols];
+            for (int i = 0; i < nrows; ++i) {
+                for (int j = 0; j < ncols; ++j) {
+                    if (QUESTION_MARK == map[i][j]) {
+                        temp_map[i][j] = BLANK;
+                    } else {
+                        temp_map[i][j] = map[i][j];
+                    }
+                }
+            }
+            try {
+                Thread.ofVirtual().start(() -> {
+                    search(0, remaining_mines);
+                }).join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         for (int[] point : all_points) {
             HashSet<Character> possibility_set = possibility_map.get(point);
