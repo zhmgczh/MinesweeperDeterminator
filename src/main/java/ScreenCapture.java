@@ -122,7 +122,7 @@ public class ScreenCapture {
         ScreenData screenRGB = capture_screen();
         if (screenRGB != null) {
             BufferedImage image = create_image_from_screen(screenRGB);
-            save_image_to_file(image, "captured_screen.png", "png");
+            save_image_to_file(image, "Debug/captured_screen.png", "png");
         } else {
             System.out.println("Failed to capture screen.");
         }
