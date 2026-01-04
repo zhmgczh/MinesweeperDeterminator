@@ -18,11 +18,10 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        frame.setSize(300, 500);
+        frame.setSize(300, 580);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
         Font bigFont = new Font("Arial", Font.BOLD, 32);
-        Font bigFont_plain = new Font("Arial", Font.PLAIN, 24);
         Font smallFont = new Font("Arial", Font.PLAIN, 20);
         JLabel label_1 = new JLabel("Minesweeper");
         label_1.setFont(bigFont);
@@ -47,7 +46,7 @@ public class Main {
         height_textField.setFont(smallFont);
         height_inputPanel.add(height_inputLabel);
         height_inputPanel.add(height_textField);
-        height_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, width_inputPanel.getPreferredSize().height));
+        height_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, height_inputPanel.getPreferredSize().height));
         JRadioButton radio1 = new JRadioButton("Beginner");
         radio1.setFont(smallFont);
         JRadioButton radio2 = new JRadioButton("Intermediate");
@@ -109,13 +108,37 @@ public class Main {
             rb.setAlignmentX(Component.LEFT_ALIGNMENT);
             radioGroupPanel.add(rb);
         }
-        JButton button = new JButton("<html><center>Tell next possible click</center></html>");
-        button.setFont(bigFont_plain);
-        button.setMaximumSize(new Dimension(200, button.getPreferredSize().height));
-        button.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "按鈕已被點擊！");
+        JButton random_move_button = new JButton("<html><center>Show one possible move randomly</center></html>");
+        random_move_button.setFont(smallFont);
+        random_move_button.setMaximumSize(new Dimension(200, random_move_button.getPreferredSize().height));
+        random_move_button.addActionListener(e -> {
+            JOptionPane.showMessageDialog(frame, "1按鈕已被點擊！");
         });
-        JComponent[] components = {label_1, label_2, radioGroupPanel, width_inputPanel, height_inputPanel, button};
+        JButton all_moves_button = new JButton("<html><center>Show all possible moves</center></html>");
+        all_moves_button.setFont(smallFont);
+        all_moves_button.setMaximumSize(new Dimension(200, all_moves_button.getPreferredSize().height));
+        all_moves_button.addActionListener(e -> {
+            JOptionPane.showMessageDialog(frame, "2按鈕已被點擊！");
+        });
+        JPanel interval_inputPanel = new JPanel();
+        JLabel interval_inputLabel = new JLabel("Interval: ");
+        interval_inputLabel.setFont(smallFont);
+        JTextField interval_textField = new JTextField(2);
+        interval_textField.setText("0.2");
+        interval_textField.setFont(smallFont);
+        JLabel interval_unitLabel = new JLabel("s");
+        interval_unitLabel.setFont(smallFont);
+        interval_inputPanel.add(interval_inputLabel);
+        interval_inputPanel.add(interval_textField);
+        interval_inputPanel.add(interval_unitLabel);
+        JButton auto_play_button = new JButton("<html><center>Start autoplay</center></html>");
+        auto_play_button.setFont(smallFont);
+        auto_play_button.setMaximumSize(new Dimension(200, auto_play_button.getPreferredSize().height));
+        auto_play_button.addActionListener(e -> {
+            JOptionPane.showMessageDialog(frame, "3按鈕已被點擊！");
+        });
+        interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
+        JComponent[] components = {label_1, label_2, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, auto_play_button};
         for (JComponent component : components) {
             centerComponent(component);
             frame.add(component);

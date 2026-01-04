@@ -17,8 +17,8 @@ public class MinesweeperState {
     public static final char SIX = '6';
     public static final char SEVEN = '7';
     public static final char EIGHT = '8';
-    static final char[] changeable_operands = {BLANK, QUESTION_MARK, MINE_FLAG};
     static final char[] unfinished_operands = {BLANK, QUESTION_MARK};
+    static final char[] lost_operands = {MINE_EXPLODED, MINE_UNFOUND, MINE_WRONGLY_FLAGGED};
     static final char[] operands = {BLANK, QUESTION_MARK, MINE_FLAG, MINE_EXPLODED, MINE_UNFOUND, MINE_WRONGLY_FLAGGED, ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT};
     static final String[] image_names = {"blank", "question_mark", "mine_flag", "mine_exploded", "mine_unfound", "mine_wrongly_flagged", "mine_0", "mine_1", "mine_2", "mine_3", "mine_4", "mine_5", "mine_6", "mine_7", "mine_8"};
     static final String[] digit_names = {"digit_0", "digit_1", "digit_2", "digit_3", "digit_4", "digit_5", "digit_6", "digit_7", "digit_8", "digit_9"};
@@ -75,15 +75,6 @@ public class MinesweeperState {
         return false;
     }
 
-    public boolean is_changeable_operand(char c) {
-        for (char operand : changeable_operands) {
-            if (c == operand) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public boolean is_unfinished_operand(char c) {
         for (char operand : unfinished_operands) {
             if (c == operand) {
@@ -91,6 +82,33 @@ public class MinesweeperState {
             }
         }
         return false;
+    }
+
+    public boolean is_lost_operand(char c) {
+        for (char operand : lost_operands) {
+            if (c == operand) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public char get_status() {
+        boolean started = false;
+        boolean unfinished = false;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < ncols; ++j) {
+                if (is_lost_operand(map[i][j])) {
+                    return 'L';
+                }
+                if (is_number(map[i][j])) {
+                    started = true;
+                } else if (is_unfinished_operand(map[i][j])) {
+                    unfinished = true;
+                }
+            }
+        }
+        return started ? (unfinished ? 'P' : 'W') : 'S';
     }
 
     public boolean is_number(char c) {
