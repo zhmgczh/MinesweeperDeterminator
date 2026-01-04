@@ -199,7 +199,7 @@ public class MinesweeperScanner {
         assert 4 == board_coordinates.length;
         int board_rgb_array[][][] = extract_picture_slice(screen.rgb_array, board_coordinates[0], board_coordinates[1], board_coordinates[2], board_coordinates[3]);
         if (debug) {
-            ScreenCapture.save_array_to_file(board_rgb_array, "captured_board.png", "png");
+            ScreenCapture.save_array_to_file(board_rgb_array, "Debug/captured_board.png", "png");
         }
         char[][] map = new char[grid_size[0]][grid_size[1]];
         for (int i = 0; i < grid_size[0]; ++i) {
@@ -276,15 +276,15 @@ public class MinesweeperScanner {
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty.png");
         ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final.png");
-        ScreenCapture.save_screen_to_file(screen, "captured_screen.png", "png");
+        ScreenCapture.save_screen_to_file(screen, "Debug/captured_screen.png", "png");
         MinesweeperScanner minesweeperScanner = new MinesweeperScanner(30, 16);
         MinesweeperState state = minesweeperScanner.scan(screen, true);
         System.out.println(state);
-        ScreenCapture.save_array_to_file(state.get_map_rgb_array(2), "scanned.png", "png");
+        ScreenCapture.save_array_to_file(state.get_map_rgb_array(2), "Debug/scanned.png", "png");
         ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
         int index=0;
         for (Pair<int[], Character> prediction : predictions) {
-            ScreenCapture.save_array_to_file(state.get_marked_rgb_array(prediction.getFirst()[0], prediction.getFirst()[1], prediction.getSecond(), 2), "predictions/prediction_"+index+".png", "png");
+            ScreenCapture.save_array_to_file(state.get_marked_rgb_array(prediction.getFirst()[0], prediction.getFirst()[1], prediction.getSecond(), 2), "Debug/predictions/prediction_"+index+".png", "png");
             ++index;
         }
     }
