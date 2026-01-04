@@ -1,4 +1,7 @@
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class MinesweeperState {
     public static final char BLANK = '*';
@@ -16,16 +19,16 @@ public class MinesweeperState {
     public static final char SIX = '6';
     public static final char SEVEN = '7';
     public static final char EIGHT = '8';
-    static final char changeable_operands[] = {BLANK, QUESTION_MARK, MINE_FLAG};
-    static final char unfinished_operands[] = {BLANK, QUESTION_MARK};
-    static final char operands[] = {BLANK, QUESTION_MARK, MINE_FLAG, MINE_EXPLODED, MINE_UNFOUND, MINE_WRONGLY_FLAGGED, ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT};
-    static final String image_names[] = {"blank", "question_mark", "mine_flag", "mine_exploded", "mine_unfound", "mine_wrongly_flagged", "mine_0", "mine_1", "mine_2", "mine_3", "mine_4", "mine_5", "mine_6", "mine_7", "mine_8"};
-    static final String digit_names[] = {"digit_0", "digit_1", "digit_2", "digit_3", "digit_4", "digit_5", "digit_6", "digit_7", "digit_8", "digit_9"};
-    static final int neighborhood[][] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 0}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
-    static int images[][][][];
-    static int digits[][][][];
+    static final char[] changeable_operands = {BLANK, QUESTION_MARK, MINE_FLAG};
+    static final char[] unfinished_operands = {BLANK, QUESTION_MARK};
+    static final char[] operands = {BLANK, QUESTION_MARK, MINE_FLAG, MINE_EXPLODED, MINE_UNFOUND, MINE_WRONGLY_FLAGGED, ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT};
+    static final String[] image_names = {"blank", "question_mark", "mine_flag", "mine_exploded", "mine_unfound", "mine_wrongly_flagged", "mine_0", "mine_1", "mine_2", "mine_3", "mine_4", "mine_5", "mine_6", "mine_7", "mine_8"};
+    static final String[] digit_names = {"digit_0", "digit_1", "digit_2", "digit_3", "digit_4", "digit_5", "digit_6", "digit_7", "digit_8", "digit_9"};
+    static final int[][] neighborhood = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 0}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+    static int[][][][] images;
+    static int[][][][] digits;
     public int time_passed, remaining_mines, nrows, ncols;
-    public char map[][];
+    public char[][] map;
 
     static {
         load_images();
@@ -101,25 +104,34 @@ public class MinesweeperState {
         return c - '0';
     }
 
-    public boolean check_number_valid(int i, int j, boolean force_finished) {
+    public boolean check_number_valid(char[][] map, int i, int j, boolean force_finished) {
         if (!is_number(map[i][j])) {
             return true;
         }
         int mines = 0;
-        for (int k = 0; k < neighborhood.length; k++) {
-            int new_i = i + neighborhood[k][0];
-            int new_j = j + neighborhood[k][1];
-            if (new_i >= 0 && new_i < map.length && new_j >= 0 && new_j < map[0].length && MINE_FLAG == map[new_i][new_j]) {
-                ++mines;
+        int blanks = 0;
+        for (int[] vector : neighborhood) {
+            int new_i = i + vector[0];
+            int new_j = j + vector[1];
+            if (new_i >= 0 && new_i < map.length && new_j >= 0 && new_j < map[0].length) {
+                if (MINE_FLAG == map[new_i][new_j]) {
+                    ++mines;
+                } else if (BLANK == map[new_i][new_j] || QUESTION_MARK == map[new_i][new_j]) {
+                    ++blanks;
+                }
             }
         }
         if (force_finished && mines != to_number(map[i][j])) {
             return false;
         }
-        if (mines > to_number(map[i][j])) {
+        if (mines > to_number(map[i][j]) || mines + blanks < to_number(map[i][j])) {
             return false;
         }
         return true;
+    }
+
+    public boolean check_number_valid(int i, int j, boolean force_finished) {
+        return check_number_valid(map, i, j, force_finished);
     }
 
     public boolean check_map_valid(char map[][], boolean force_finished) {
@@ -139,18 +151,6 @@ public class MinesweeperState {
         return true;
     }
 
-    public void move(char operand, int i, int j) {
-        assert i >= 0 && i < nrows && j >= 0 && j < ncols;
-        assert is_changeable_operand(operand);
-        map[i][j] = operand;
-    }
-
-    public void change_map(char map[][]) {
-        assert null != map && map.length == nrows && null != map[0] && map[0].length == ncols;
-        assert check_map_valid(map, false);
-        this.map = map;
-    }
-
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Time passed: ").append(time_passed).append(" Remaining mines: ").append(remaining_mines).
@@ -167,7 +167,6 @@ public class MinesweeperState {
 
     public int[][][] get_map_rgb_array() {
         int[][][] rgb = new int[nrows * images[0].length][ncols * images[0][0].length][3];
-        System.out.println(rgb.length + " " + rgb[0].length);
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < ncols; ++j) {
                 for (int k = 0; k < operands.length; ++k) {
@@ -192,5 +191,100 @@ public class MinesweeperState {
     public int[][][] get_map_rgb_array(int resize) {
         int[][][] rgb = get_map_rgb_array();
         return RGB.resize(rgb, rgb.length * resize, rgb[0].length * resize);
+    }
+
+    private static final int[][] unit_vectors = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+    private static char[][] temp_map;
+    private static HashMap<int[], HashSet<Character>> possibility_map;
+    private static ArrayList<int[]> all_points;
+
+    private boolean check_position_valid(int i, int j) {
+        for (int[] unit_vector : unit_vectors) {
+            int number_x = i + unit_vector[0];
+            int number_y = j + unit_vector[1];
+            if (number_x >= 0 && number_x < nrows && number_y >= 0 && number_y < ncols && is_number(map[number_x][number_y])) {
+                if (!check_number_valid(temp_map, number_x, number_y, false)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void search(int point_index) {
+        if (point_index == all_points.size()) {
+            for (int[] point : all_points) {
+                possibility_map.get(point).add(temp_map[point[0]][point[1]]);
+            }
+        } else {
+            int x = all_points.get(point_index)[0];
+            int y = all_points.get(point_index)[1];
+            temp_map[x][y] = ZERO;
+            if (check_position_valid(x, y)) {
+                search(point_index + 1);
+            }
+            temp_map[x][y] = MINE_FLAG;
+            if (check_position_valid(x, y)) {
+                search(point_index + 1);
+            }
+            temp_map[x][y] = BLANK;
+        }
+    }
+
+    public ArrayList<Pair<int[], Character>> get_predictions(int layers) {
+        ArrayList<Pair<int[], Character>> predictions = new ArrayList<>();
+        all_points = new ArrayList<>();
+        HashMap<int[], Integer> point_layer = new HashMap<>();
+        for (int layer = 0; layer < layers; ++layer) {
+            for (int i = 0; i < nrows; ++i) {
+                for (int j = 0; j < ncols; ++j) {
+                    for (int[] unit_vector : unit_vectors) {
+                        if (is_number(map[i][j])) {
+                            int new_x = i + (layer + 1) * unit_vector[0];
+                            int new_y = j + (layer + 1) * unit_vector[1];
+                            if (new_x >= 0 && new_x < nrows && new_y >= 0 && new_y < ncols && (BLANK == map[new_x][new_y] || QUESTION_MARK == map[new_x][new_y])) {
+                                int[] point = new int[]{new_x, new_y};
+                                all_points.add(point);
+                                point_layer.put(point, layer);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        temp_map = new char[nrows][ncols];
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < ncols; ++j) {
+                if (QUESTION_MARK == map[i][j]) {
+                    temp_map[i][j] = BLANK;
+                } else {
+                    temp_map[i][j] = map[i][j];
+                }
+            }
+        }
+        possibility_map = new HashMap<>();
+        for (int[] point : all_points) {
+            possibility_map.put(point, new HashSet<>());
+        }
+        try {
+            Thread.ofVirtual().start(() -> {
+                search(0);
+            }).join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for (int[] point : all_points) {
+            HashSet<Character> possibility_set = possibility_map.get(point);
+            if (possibility_set.isEmpty()) {
+                return null;
+            } else if (1 == possibility_set.size()) {
+                predictions.add(new Pair<>(point, (Character) possibility_set.toArray()[0]));
+            }
+        }
+        return predictions;
+    }
+
+    public ArrayList<Pair<int[], Character>> get_predictions() {
+        return get_predictions(1);
     }
 }

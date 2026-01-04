@@ -1,10 +1,10 @@
 import java.util.*;
 
 public class MinesweeperScanner {
-    public static final int panel_background[][] = {{189, 189, 189}};
-    public static final int digits_boards_background[][] = {{0, 0, 0}};
-    public static final int board_border[][] = {{131, 131, 131}, {255, 255, 255}};
-    int grid_size[];
+    public static final int[][] panel_background = {{189, 189, 189}};
+    public static final int[][] digits_boards_background = {{0, 0, 0}};
+    public static final int[][] board_border = {{131, 131, 131}, {255, 255, 255}};
+    int[] grid_size;
 
     public MinesweeperScanner(int width, int height) {
         assert width > 0 && height > 0;
@@ -280,6 +280,7 @@ public class MinesweeperScanner {
         MinesweeperScanner minesweeperScanner = new MinesweeperScanner(30, 16);
         MinesweeperState state = minesweeperScanner.scan(screen, true);
         System.out.println(state);
+        System.out.println("Predictions: " + state.get_predictions());
         ScreenCapture.save_array_to_file(state.get_map_rgb_array(2), "scanned.png", "png");
     }
 }

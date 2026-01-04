@@ -3,7 +3,7 @@ import java.util.Stack;
 
 public class RGB {
     public static final double CIRCLE_RATIO = 1;
-    static final int neighborhood[][] = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+    static final int[][] neighborhood = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
 
     public static double distance(double x_1, double y_1, double x_2, double y_2) {
         double diff_x = x_1 - x_2;
