@@ -18,7 +18,7 @@ public class MinesweeperScanner {
 
     public static int[] find_panel_coordinates(ScreenData screen) {
         assert screen != null;
-        ArrayList<ArrayList<int[]>> blocks = RGB.find_similar_color_blocks(screen.rgb_array, 0, screen.width, 0, screen.height, panel_background, 50);
+        ArrayList<ArrayList<int[]>> blocks = RGB.find_similar_color_blocks(screen.rgb_array, 0, screen.width, 0, screen.height, panel_background, 10);
         int max_area = 0;
         int width_l = 0, width_r = screen.width, height_l = 0, height_r = screen.height;
         for (int i = 0; i < blocks.size(); ++i) {

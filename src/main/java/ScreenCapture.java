@@ -117,6 +117,14 @@ public class ScreenCapture {
         save_image_to_file(image, fiile_path, format_name);
     }
 
+    public static BufferedImage get_captured_screen() {
+        ScreenData screenRGB = capture_screen();
+        if (screenRGB != null) {
+            return create_image_from_screen(screenRGB);
+        }
+        return null;
+    }
+
     public static void main(String[] args) {
         System.out.println("Capturing screen...");
         ScreenData screenRGB = capture_screen();
