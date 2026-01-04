@@ -1,5 +1,6 @@
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -281,6 +282,7 @@ public class MinesweeperState {
                 predictions.add(new Pair<>(point, (Character) possibility_set.toArray()[0]));
             }
         }
+        predictions.sort(Comparator.comparingInt(o -> point_layer.get(o.getFirst())));
         return predictions;
     }
 
