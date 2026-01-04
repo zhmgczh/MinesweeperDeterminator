@@ -4,6 +4,7 @@ public class MinesweeperScanner {
     public static final int[][] panel_background = {{189, 189, 189}};
     public static final int[][] digits_boards_background = {{0, 0, 0}};
     public static final int[][] board_border = {{131, 131, 131}, {255, 255, 255}};
+    int[] board_coordinates;
     int[] grid_size;
 
     public MinesweeperScanner(int width, int height) {
@@ -194,6 +195,13 @@ public class MinesweeperScanner {
         return new int[]{width_l, width_r, height_l, height_r};
     }
 
+    public int[] get_grid_coordinates(int i, int j) {
+        if (null == board_coordinates) {
+            return null;
+        }
+        return get_grid_coordinates(board_coordinates, grid_size, i, j);
+    }
+
     public char[][] get_map(ScreenData screen, int board_coordinates[], boolean debug) {
         assert screen != null && MinesweeperState.images != null;
         assert 4 == board_coordinates.length;
@@ -264,6 +272,7 @@ public class MinesweeperScanner {
                 remaining_mines_and_times_coordinates[7],
                 3));
         int board_coordinates[] = find_board_coordinates(screen, panel_coordinates);
+        this.board_coordinates = board_coordinates;
         char map[][] = get_map(screen, board_coordinates, debug);
         return new MinesweeperState(time_passed, remaining_mines, map);
     }

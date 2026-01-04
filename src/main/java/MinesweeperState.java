@@ -167,6 +167,21 @@ public class MinesweeperState {
         return true;
     }
 
+    public int get_nrows() {
+        return nrows;
+    }
+
+    public int get_ncols() {
+        return ncols;
+    }
+
+    public char get_state(int i, int j) {
+        if (i >= 0 && j >= 0 && i < nrows && j < map[0].length) {
+            return map[i][j];
+        }
+        return ' ';
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Time passed: ").append(time_passed).append(" Remaining mines: ").append(remaining_mines).

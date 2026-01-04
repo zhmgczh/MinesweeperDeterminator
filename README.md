@@ -28,7 +28,10 @@ Currently, it only focuses on the fitness of the website [https://minesweeper-pr
    cd MinesweeperDeterminator
    ```
 
-2. Run the project through the main class: `Main.java`.
+2. Run the project through the main class in `Main.java`, or simply run it via JAR:
+   ```bash
+   java -jar minesweeper-determinator.jar
+   ```
 
 3. Make sure the Minesweeper window is visible on your screen when running the program.
 

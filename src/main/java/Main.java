@@ -88,11 +88,29 @@ public class Main {
         try {
             int w = Integer.parseInt(width_field.getText());
             int h = Integer.parseInt(height_field.getText());
-            return new Pair<>(w, h);
+            if (w < 1 || h < 1) {
+                JOptionPane.showMessageDialog(frame, "Please enter positive width and height.", "Warning", JOptionPane.WARNING_MESSAGE);
+            } else {
+                return new Pair<>(w, h);
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, "Please enter valid width and height.", "Warning", JOptionPane.WARNING_MESSAGE);
         }
         return null;
+    }
+
+    private static int get_interval(JFrame frame, JTextField interval_field) {
+        try {
+            double seconds = Double.parseDouble(interval_field.getText());
+            if (seconds <= 0) {
+                JOptionPane.showMessageDialog(frame, "Please enter a positive interval.", "Warning", JOptionPane.WARNING_MESSAGE);
+            } else {
+                return (int) (seconds * 1000 + 0.5);
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(frame, "Please enter a valid interval.", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+        return 0;
     }
 
     private static void get_and_show_predictions(JFrame frame, boolean all, int width, int height) {
@@ -149,6 +167,39 @@ public class Main {
                     BufferedImage scanned = ScreenCapture.create_image_from_array(scanned_rgb_array);
                     BufferedImage marked = ScreenCapture.create_image_from_array(marked_rgb_array);
                     makeFlipFrame(frame, scanned, marked);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Cannot find any move. You have to guess.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        }
+    }
+
+    private static void autoplay_iteration(JFrame frame, int width, int height) {
+        ScreenData screen = capture_screen(frame);
+        if (screen != null) {
+            if (debug) {
+                ScreenCapture.save_screen_to_file(screen, "Debug/captured_screen.png", "png");
+            }
+            MinesweeperScanner minesweeperScanner = new MinesweeperScanner(width, height);
+            MinesweeperState state;
+            try {
+                state = minesweeperScanner.scan(screen, debug);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Didn't find your minesweeper board.", "Warning", JOptionPane.WARNING_MESSAGE);
+                ex.printStackTrace();
+                return;
+            }
+            char status = state.get_status();
+            if ('S' == status) {
+                JOptionPane.showMessageDialog(frame, "You haven't started the game. Please click at least once.", "Warning", JOptionPane.WARNING_MESSAGE);
+            } else if ('L' == status) {
+                JOptionPane.showMessageDialog(frame, "The game has been lost.", "Warning", JOptionPane.WARNING_MESSAGE);
+            } else if ('W' == status) {
+                JOptionPane.showMessageDialog(frame, "You won. Congratulations!", "Information", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
+                if (!predictions.isEmpty()) {
+
                 } else {
                     JOptionPane.showMessageDialog(frame, "Cannot find any move. You have to guess.", "Information", JOptionPane.INFORMATION_MESSAGE);
                 }
@@ -304,7 +355,10 @@ public class Main {
         auto_play_button.setFont(smallFont);
         auto_play_button.setMaximumSize(new Dimension(200, auto_play_button.getPreferredSize().height));
         auto_play_button.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "3按鈕已被點擊！");
+            int interval = get_interval(frame, interval_textField);
+            if (interval > 0) {
+
+            }
         });
         interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
         JComponent[] components = {label_1, label_2, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, auto_play_button};
