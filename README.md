@@ -41,8 +41,6 @@ Currently, it only focuses on the fitness of the website [https://minesweeper-pr
 
 - Add support for different Minesweeper themes and resolutions.
 - Improve OCR accuracy for mine counter detection.
-- Add a GUI for visualization of analysis results.
-- Support direct interaction with the game (auto-play).
 
 ---
 
