@@ -267,6 +267,7 @@ public class MinesweeperState {
     private static HashMap<int[], HashSet<Character>> possibility_map;
     private static ArrayList<int[]> all_points;
     private static long search_stop_before;
+    private static boolean force_stopped = false;
 
     private boolean check_position_valid(int i, int j) {
         for (int[] unit_vector : unit_vectors) {
@@ -307,6 +308,7 @@ public class MinesweeperState {
 
     private void search(int point_index, int remaining_mines) {
         if (System.currentTimeMillis() > search_stop_before) {
+            force_stopped = true;
             return;
         }
         if (remaining_mines >= 0) {
@@ -334,6 +336,7 @@ public class MinesweeperState {
 
     public ArrayList<Pair<int[], Character>> get_predictions(int layers, long search_stop_before) {
         MinesweeperState.search_stop_before = search_stop_before;
+        force_stopped = false;
         ArrayList<Pair<int[], Character>> predictions = new ArrayList<>();
         all_points = new ArrayList<>();
         HashMap<int[], Integer> point_layer = new HashMap<>();
@@ -381,6 +384,9 @@ public class MinesweeperState {
                 }).join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
+            if (force_stopped) {
+                return predictions;
             }
         }
         for (int[] point : all_points) {
