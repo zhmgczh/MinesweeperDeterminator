@@ -16,7 +16,7 @@ Currently, it only focuses on the fitness of the website [https://minesweeper-pr
 
 ## Requirements
 
-- Java 8 or above
+- OpenJDK 22 or above
 - A standard Minesweeper game running on your screen (any version with a consistent visual layout)
 - Desktop environment (not headless)
 
@@ -24,7 +24,7 @@ Currently, it only focuses on the fitness of the website [https://minesweeper-pr
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/MinesweeperDeterminator.git
+   git clone https://github.com/zhmgczh/MinesweeperDeterminator.git
    cd MinesweeperDeterminator
    ```
 
