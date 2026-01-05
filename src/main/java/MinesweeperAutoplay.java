@@ -3,6 +3,7 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 public class MinesweeperAutoplay {
     private static GlobalHotkeyMouseClicker robot;
@@ -26,11 +27,6 @@ public class MinesweeperAutoplay {
             char target = prediction.getSecond();
             if (MinesweeperState.QUESTION_MARK == current) {
                 robot.clickAt(x, y, GlobalHotkeyMouseClicker.MouseButton.RIGHT);
-                try {
-                    robot.wait(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
             if (MinesweeperState.ZERO == target) {
                 robot.clickAt(x, y, GlobalHotkeyMouseClicker.MouseButton.LEFT);
@@ -48,7 +44,7 @@ public class MinesweeperAutoplay {
         for (Pair<int[], Character> prediction : predictions) {
             successful = single_move(prediction, scanner, state);
             try {
-                robot.wait(interval);
+                Thread.sleep(interval);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -59,16 +55,16 @@ public class MinesweeperAutoplay {
         return successful;
     }
 
-    public static boolean register_exit_key(Runnable on_start, Runnable on_exit) {
-        try (GlobalHotkeyMouseClicker app = new GlobalHotkeyMouseClicker()) {
+    public static AutoCloseable register_exit_key(Runnable on_start, Runnable on_exit) {
+        try {
+            GlobalHotkeyMouseClicker app = new GlobalHotkeyMouseClicker();
             app.start();
-            on_start.run();
             app.bindHotkey(GlobalHotkeyMouseClicker.hotkey(NativeKeyEvent.VC_ESCAPE), on_exit);
-            Thread.currentThread().join();
-            return true;
-        } catch (InterruptedException | NativeHookException | AWTException e) {
+            on_start.run();
+            return app;
+        } catch (NativeHookException | AWTException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
 }

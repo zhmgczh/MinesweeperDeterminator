@@ -4,11 +4,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JTextField;
 import javax.swing.JPanel;
 
 public class Main {
-    private static boolean debug = true;
+    private static boolean debug = false;
 
     private static ScreenData capture_screen(JFrame frame) {
         BufferedImage image = ScreenCapture.get_captured_screen();
@@ -143,7 +144,7 @@ public class Main {
             } else {
                 ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
                 int[][][] marked_rgb_array;
-                if (!predictions.isEmpty()) {
+                if (null != predictions && !predictions.isEmpty()) {
                     if (all) {
                         marked_rgb_array = state.get_marked_rgb_array(predictions, 2);
                         if (debug) {
@@ -174,7 +175,7 @@ public class Main {
         }
     }
 
-    private static void autoplay_iteration(JFrame frame, int width, int height) {
+    private static boolean autoplay_iteration(JFrame frame, int width, int height, int interval) {
         ScreenData screen = capture_screen(frame);
         if (screen != null) {
             if (debug) {
@@ -187,24 +188,73 @@ public class Main {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Didn't find your minesweeper board.", "Warning", JOptionPane.WARNING_MESSAGE);
                 ex.printStackTrace();
-                return;
+                return false;
             }
             char status = state.get_status();
             if ('S' == status) {
                 JOptionPane.showMessageDialog(frame, "You haven't started the game. Please click at least once.", "Warning", JOptionPane.WARNING_MESSAGE);
+                return false;
             } else if ('L' == status) {
                 JOptionPane.showMessageDialog(frame, "The game has been lost.", "Warning", JOptionPane.WARNING_MESSAGE);
+                return false;
             } else if ('W' == status) {
                 JOptionPane.showMessageDialog(frame, "You won. Congratulations!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                return false;
             } else {
                 ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
-                if (!predictions.isEmpty()) {
-
+                if (null != predictions && !predictions.isEmpty()) {
+                    return MinesweeperAutoplay.iteration(predictions, interval, minesweeperScanner, state);
                 } else {
                     JOptionPane.showMessageDialog(frame, "Cannot find any move. You have to guess.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                    return false;
                 }
             }
+        } else {
+            return false;
         }
+    }
+
+    private static void prepare_autoplay(JButton[] buttons, JButton autoplay_button) {
+        autoplay_button.setText("<html><center>Stop (Press Esc)</center></html>");
+        for (JButton button : buttons) {
+            button.setEnabled(false);
+        }
+    }
+
+    private static void after_autoplay(JButton[] buttons, JButton autoplay_button) {
+        for (JButton button : buttons) {
+            button.setEnabled(true);
+        }
+        autoplay_button.setText("<html><center>Start autoplay</center></html>");
+    }
+
+    private static void autoplay(JFrame frame, int width, int height, int interval, JButton[] buttons, JButton autoplay_button) {
+        prepare_autoplay(buttons, autoplay_button);
+        AtomicBoolean continue_autoplay = new AtomicBoolean(true);
+        AutoCloseable register = MinesweeperAutoplay.register_exit_key(() -> {
+        }, () -> {
+            if (continue_autoplay.get()) {
+                continue_autoplay.set(false);
+            }
+        });
+        if (null == register) {
+            JOptionPane.showMessageDialog(frame, "Cannot register Esc key.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        while (continue_autoplay.get()) {
+            continue_autoplay.set(autoplay_iteration(frame, width, height, interval));
+            try {
+                Thread.sleep(interval);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
+        try {
+            register.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        after_autoplay(buttons, autoplay_button);
     }
 
     public static void deleteRecursively(File file) {
@@ -344,7 +394,7 @@ public class Main {
         JLabel interval_inputLabel = new JLabel("Interval: ");
         interval_inputLabel.setFont(smallFont);
         JTextField interval_textField = new JTextField(2);
-        interval_textField.setText("0.2");
+        interval_textField.setText("0.1");
         interval_textField.setFont(smallFont);
         JLabel interval_unitLabel = new JLabel("s");
         interval_unitLabel.setFont(smallFont);
@@ -355,9 +405,10 @@ public class Main {
         auto_play_button.setFont(smallFont);
         auto_play_button.setMaximumSize(new Dimension(200, auto_play_button.getPreferredSize().height));
         auto_play_button.addActionListener(e -> {
+            Pair<Integer, Integer> width_height = get_width_height(frame, width_textField, height_textField);
             int interval = get_interval(frame, interval_textField);
-            if (interval > 0) {
-
+            if (width_height != null && interval > 0) {
+                autoplay(frame, width_height.getFirst(), width_height.getSecond(), interval, new JButton[]{random_move_button, all_moves_button, auto_play_button}, auto_play_button);
             }
         });
         interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
