@@ -35,25 +35,7 @@ Currently, it only focuses on the fitness of the website [https://minesweeper-pr
 
 3. Make sure the Minesweeper window is visible on your screen when running the program.
 
-4. Follow on-screen instructions to let the program analyze the game state and suggest your next move.
-
-## Example
-
-Here's an example output from the program:
-
-```
-Detected 12 remaining mines.
-Analyzing current board state...
-✅ Safe move found at (5, 3). Proceed without guessing.
-```
-
-or
-
-```
-Detected 3 remaining mines.
-Analyzing current board state...
-⚠️ No deterministic move found. You must guess between (2, 4) and (2, 5).
-```
+4. Follow on-screen instructions to let the program analyze the game state and suggest your next move. The best zoom-in percentage is 200%. The board needs to be completely shown on screen.
 
 ## Future Improvements
 
