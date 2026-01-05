@@ -9,6 +9,8 @@ import javax.swing.JTextField;
 import javax.swing.JPanel;
 
 public class Main {
+    private static final int time_upper_limit = 10000;
+    private static final int layer_upper_limit = 3;
     private static boolean debug = false;
 
     private static ScreenData capture_screen(JFrame frame) {
@@ -144,8 +146,9 @@ public class Main {
             } else {
                 ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
                 if (null != predictions && predictions.isEmpty()) {
+                    long start_time = System.currentTimeMillis();
                     int layers = 2;
-                    while (predictions.isEmpty() && layers <= 3) {
+                    while (predictions.isEmpty() && layers <= layer_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
                         predictions = state.get_predictions(layers++);
                     }
                 }
@@ -209,8 +212,9 @@ public class Main {
             } else {
                 ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
                 if (null != predictions && predictions.isEmpty()) {
+                    long start_time = System.currentTimeMillis();
                     int layers = 2;
-                    while (predictions.isEmpty() && layers <= 3) {
+                    while (predictions.isEmpty() && layers <= layer_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
                         predictions = state.get_predictions(layers++);
                     }
                 }
