@@ -9,8 +9,6 @@ import javax.swing.JTextField;
 import javax.swing.JPanel;
 
 public class Main {
-    private static final int time_upper_limit = 10000;
-    private static final int layer_upper_limit = 3;
     private static boolean debug = false;
 
     private static ScreenData capture_screen(JFrame frame) {
@@ -87,36 +85,35 @@ public class Main {
         return f;
     }
 
-    private static Pair<Integer, Integer> get_width_height(JFrame frame, JTextField width_field, JTextField height_field) {
+    private static int get_positive_integer(JFrame frame, JTextField field, String name) {
         try {
-            int w = Integer.parseInt(width_field.getText());
-            int h = Integer.parseInt(height_field.getText());
-            if (w < 1 || h < 1) {
-                JOptionPane.showMessageDialog(frame, "Please enter positive width and height.", "Warning", JOptionPane.WARNING_MESSAGE);
+            int result = Integer.parseInt(field.getText());
+            if (result < 1) {
+                JOptionPane.showMessageDialog(frame, "Please enter " + name + " as a positive integer.", "Warning", JOptionPane.WARNING_MESSAGE);
             } else {
-                return new Pair<>(w, h);
+                return result;
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(frame, "Please enter valid width and height.", "Warning", JOptionPane.WARNING_MESSAGE);
-        }
-        return null;
-    }
-
-    private static int get_interval(JFrame frame, JTextField interval_field) {
-        try {
-            double seconds = Double.parseDouble(interval_field.getText());
-            if (seconds <= 0) {
-                JOptionPane.showMessageDialog(frame, "Please enter a positive interval.", "Warning", JOptionPane.WARNING_MESSAGE);
-            } else {
-                return (int) (seconds * 1000 + 0.5);
-            }
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(frame, "Please enter a valid interval.", "Warning", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Please enter " + name + " as a positive integer.", "Warning", JOptionPane.WARNING_MESSAGE);
         }
         return 0;
     }
 
-    private static void get_and_show_predictions(JFrame frame, boolean all, int width, int height) {
+    private static int get_milliseconds(JFrame frame, JTextField interval_field, String name) {
+        try {
+            double seconds = Double.parseDouble(interval_field.getText());
+            if (seconds <= 0) {
+                JOptionPane.showMessageDialog(frame, "Please enter a valid " + name + ".", "Warning", JOptionPane.WARNING_MESSAGE);
+            } else {
+                return (int) (seconds * 1000 + 0.5);
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(frame, "Please enter a valid " + name + ".", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+        return 0;
+    }
+
+    private static void get_and_show_predictions(JFrame frame, boolean all, int width, int height, int layers_upper_limit, int time_upper_limit) {
         ScreenData screen = capture_screen(frame);
         if (screen != null) {
             if (debug) {
@@ -148,7 +145,7 @@ public class Main {
                 if (null != predictions && predictions.isEmpty()) {
                     long start_time = System.currentTimeMillis();
                     int layers = 2;
-                    while (predictions.isEmpty() && layers <= layer_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
+                    while (predictions.isEmpty() && layers <= layers_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
                         predictions = state.get_predictions(layers++);
                     }
                 }
@@ -184,7 +181,7 @@ public class Main {
         }
     }
 
-    private static boolean autoplay_iteration(JFrame frame, int width, int height, int interval) {
+    private static boolean autoplay_iteration(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit) {
         ScreenData screen = capture_screen(frame);
         if (screen != null) {
             if (debug) {
@@ -214,7 +211,7 @@ public class Main {
                 if (null != predictions && predictions.isEmpty()) {
                     long start_time = System.currentTimeMillis();
                     int layers = 2;
-                    while (predictions.isEmpty() && layers <= layer_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
+                    while (predictions.isEmpty() && layers <= layers_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
                         predictions = state.get_predictions(layers++);
                     }
                 }
@@ -247,7 +244,7 @@ public class Main {
     static boolean continue_autoplay;
     static AutoCloseable register;
 
-    private static void autoplay(JFrame frame, int width, int height, int interval, JButton[] buttons, JButton autoplay_button) {
+    private static void autoplay(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
         prepare_autoplay(buttons, autoplay_button);
         continue_autoplay = true;
         if (null == register) {
@@ -255,7 +252,7 @@ public class Main {
             return;
         }
         while (continue_autoplay) {
-            continue_autoplay = continue_autoplay && autoplay_iteration(frame, width, height, interval);
+            continue_autoplay = continue_autoplay && autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit);
             try {
                 Thread.sleep(interval);
             } catch (InterruptedException ex) {
@@ -301,7 +298,7 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        frame.setSize(300, 600);
+        frame.setSize(300, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
         Font bigFont = new Font("Arial", Font.BOLD, 32);
@@ -310,6 +307,25 @@ public class Main {
         label_1.setFont(bigFont);
         JLabel label_2 = new JLabel("Determinator");
         label_2.setFont(bigFont);
+        JPanel layers_inputPanel = new JPanel();
+        JLabel layers_inputLabel = new JLabel("Search layers upper limit: ");
+        layers_inputLabel.setFont(smallFont);
+        JTextField layers_textField = new JTextField(2);
+        layers_textField.setText("3");
+        layers_textField.setFont(smallFont);
+        layers_inputPanel.add(layers_inputLabel);
+        layers_inputPanel.add(layers_textField);
+        JPanel time_inputPanel = new JPanel();
+        JLabel time_inputLabel = new JLabel("Search time upper limit: ");
+        time_inputLabel.setFont(smallFont);
+        JTextField time_textField = new JTextField(2);
+        time_textField.setText("10");
+        time_textField.setFont(smallFont);
+        JLabel time_unitLabel = new JLabel("s");
+        time_unitLabel.setFont(smallFont);
+        time_inputPanel.add(time_inputLabel);
+        time_inputPanel.add(time_textField);
+        time_inputPanel.add(time_unitLabel);
         JPanel width_inputPanel = new JPanel();
         JLabel width_inputLabel = new JLabel("Width: ");
         width_inputLabel.setFont(smallFont);
@@ -395,18 +411,24 @@ public class Main {
         random_move_button.setFont(smallFont);
         random_move_button.setMaximumSize(new Dimension(200, random_move_button.getPreferredSize().height));
         random_move_button.addActionListener(e -> {
-            Pair<Integer, Integer> width_height = get_width_height(frame, width_textField, height_textField);
-            if (width_height != null) {
-                get_and_show_predictions(frame, false, width_height.getFirst(), width_height.getSecond());
+            int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
+            int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
+            int width = get_positive_integer(frame, width_textField, "width");
+            int height = get_positive_integer(frame, height_textField, "height");
+            if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height) {
+                get_and_show_predictions(frame, false, width, height, layers_upper_limit, time_upper_limit);
             }
         });
         JButton all_moves_button = new JButton("<html><center>Show all possible moves</center></html>");
         all_moves_button.setFont(smallFont);
         all_moves_button.setMaximumSize(new Dimension(200, all_moves_button.getPreferredSize().height));
         all_moves_button.addActionListener(e -> {
-            Pair<Integer, Integer> width_height = get_width_height(frame, width_textField, height_textField);
-            if (width_height != null) {
-                get_and_show_predictions(frame, true, width_height.getFirst(), width_height.getSecond());
+            int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
+            int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
+            int width = get_positive_integer(frame, width_textField, "width");
+            int height = get_positive_integer(frame, height_textField, "height");
+            if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height) {
+                get_and_show_predictions(frame, true, width, height, layers_upper_limit, time_upper_limit);
             }
         });
         JPanel interval_inputPanel = new JPanel();
@@ -424,16 +446,19 @@ public class Main {
         auto_play_button.setFont(smallFont);
         auto_play_button.setMaximumSize(new Dimension(200, auto_play_button.getPreferredSize().height));
         auto_play_button.addActionListener(e -> {
-            Pair<Integer, Integer> width_height = get_width_height(frame, width_textField, height_textField);
-            int interval = get_interval(frame, interval_textField);
-            if (width_height != null && interval > 0) {
-                autoplay(frame, width_height.getFirst(), width_height.getSecond(), interval, new JButton[]{random_move_button, all_moves_button, auto_play_button}, auto_play_button);
+            int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
+            int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
+            int width = get_positive_integer(frame, width_textField, "width");
+            int height = get_positive_integer(frame, height_textField, "height");
+            int interval = get_milliseconds(frame, interval_textField, "interval");
+            if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height && 0 != interval) {
+                autoplay(frame, width, height, interval, layers_upper_limit, time_upper_limit, new JButton[]{random_move_button, all_moves_button, auto_play_button}, auto_play_button);
             }
         });
         JLabel label_3 = new JLabel("(Press Esc furiously to exit)");
         label_3.setFont(smallFont);
         interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
-        JComponent[] components = {label_1, label_2, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, auto_play_button, label_3};
+        JComponent[] components = {label_1, label_2, layers_inputPanel, time_inputPanel, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, auto_play_button, label_3};
         for (JComponent component : components) {
             centerComponent(component);
             frame.add(component);
@@ -444,5 +469,7 @@ public class Main {
         frame.setAlwaysOnTop(true);
         frame.setResizable(false);
         frame.setVisible(true);
+        frame.getContentPane().setFocusable(true);
+        frame.getContentPane().requestFocusInWindow();
     }
 }
