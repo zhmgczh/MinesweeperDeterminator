@@ -29,6 +29,7 @@ bin/
 **/._*
 **/.~*
 **/.DS_Store
+libJNativeHook.arm64.dylib
 
 ### Maven ###
 target/
