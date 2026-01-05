@@ -1,8 +1,10 @@
 <component name="ArtifactManager">
   <artifact type="jar" build-on-make="true" name="minesweeper-determinator:jar">
-    <output-path>$PROJECT_DIR$</output-path>
+    <output-path>$PROJECT_DIR$/</output-path>
     <root id="archive" name="minesweeper-determinator.jar">
       <element id="module-output" name="minesweeper-determinator" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/kwhat/jnativehook/2.2.2/jnativehook-2.2.2.jar" path-in-jar="/" />
+      <element id="library" level="project" name="Maven: com.github.kwhat:jnativehook:2.2.2" />
     </root>
   </artifact>
 </component>
