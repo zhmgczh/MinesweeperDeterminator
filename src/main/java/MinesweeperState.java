@@ -58,7 +58,7 @@ public class MinesweeperState {
     public MinesweeperState(int time_passed, int remaining_mines, char map[][]) {
         assert time_passed >= 0 && time_passed <= 999 && remaining_mines >= 0;
         assert null != map && map.length > 0 && null != map[0] && map[0].length > 0;
-        assert check_map_valid(map, false);
+        assert check_map_valid(map, remaining_mines, false);
         this.time_passed = time_passed;
         this.remaining_mines = remaining_mines;
         this.map = map;
@@ -150,21 +150,28 @@ public class MinesweeperState {
         return check_number_valid(map, i, j, force_finished);
     }
 
-    public boolean check_map_valid(char map[][], boolean force_finished) {
+    public boolean check_map_valid(char map[][], int remaining_mines, boolean force_finished) {
+        if (force_finished && 0 != remaining_mines) {
+            return false;
+        }
+        int blanks = 0;
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
+                if (BLANK == map[i][j] || QUESTION_MARK == map[i][j]) {
+                    ++blanks;
+                }
                 if (force_finished && is_unfinished_operand(map[i][j])) {
                     return false;
                 }
                 if (!is_valid_operand(map[i][j])) {
                     return false;
                 }
-                if (!check_number_valid(i, j, force_finished)) {
+                if (!check_number_valid(map, i, j, force_finished)) {
                     return false;
                 }
             }
         }
-        return true;
+        return remaining_mines <= blanks;
     }
 
     public int get_nrows() {
@@ -273,11 +280,37 @@ public class MinesweeperState {
         return true;
     }
 
+    public boolean check_temp_map_valid(int remaining_mines, boolean force_finished) {
+        if (force_finished && 0 != remaining_mines) {
+            return false;
+        }
+        int blanks = 0;
+        for (int i = 0; i < nrows; i++) {
+            for (int j = 0; j < ncols; j++) {
+                if (BLANK == temp_map[i][j] || QUESTION_MARK == temp_map[i][j]) {
+                    ++blanks;
+                }
+                if (force_finished && is_unfinished_operand(temp_map[i][j])) {
+                    return false;
+                }
+                if (!is_valid_operand(map[i][j])) {
+                    return false;
+                }
+                if (is_number(map[i][j]) && !check_number_valid(map, i, j, force_finished)) {
+                    return false;
+                }
+            }
+        }
+        return remaining_mines <= blanks;
+    }
+
     private void search(int point_index, int remaining_mines) {
         if (remaining_mines >= 0) {
             if (point_index == all_points.size()) {
-                for (int[] point : all_points) {
-                    possibility_map.get(point).add(temp_map[point[0]][point[1]]);
+                if (check_temp_map_valid(remaining_mines, false)) {
+                    for (int[] point : all_points) {
+                        possibility_map.get(point).add(temp_map[point[0]][point[1]]);
+                    }
                 }
             } else {
                 int x = all_points.get(point_index)[0];

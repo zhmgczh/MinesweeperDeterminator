@@ -143,6 +143,12 @@ public class Main {
                 JOptionPane.showMessageDialog(frame, "You won. Congratulations!", "Information", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
+                if (null != predictions && predictions.isEmpty()) {
+                    int layers = 2;
+                    while (!predictions.isEmpty() && layers <= 3) {
+                        predictions = state.get_predictions(layers++);
+                    }
+                }
                 int[][][] marked_rgb_array;
                 if (null != predictions && !predictions.isEmpty()) {
                     if (all) {
@@ -202,6 +208,12 @@ public class Main {
                 return false;
             } else {
                 ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
+                if (null != predictions && predictions.isEmpty()) {
+                    int layers = 2;
+                    while (!predictions.isEmpty() && layers <= 3) {
+                        predictions = state.get_predictions(layers++);
+                    }
+                }
                 if (null != predictions && !predictions.isEmpty()) {
                     return MinesweeperAutoplay.iteration(predictions, interval, minesweeperScanner, state);
                 } else {
@@ -228,21 +240,18 @@ public class Main {
         autoplay_button.setText("<html><center>Start autoplay</center></html>");
     }
 
+    static boolean continue_autoplay;
+    static AutoCloseable register;
+
     private static void autoplay(JFrame frame, int width, int height, int interval, JButton[] buttons, JButton autoplay_button) {
         prepare_autoplay(buttons, autoplay_button);
-        AtomicBoolean continue_autoplay = new AtomicBoolean(true);
-        AutoCloseable register = MinesweeperAutoplay.register_exit_key(() -> {
-        }, () -> {
-            if (continue_autoplay.get()) {
-                continue_autoplay.set(false);
-            }
-        });
+        continue_autoplay = true;
         if (null == register) {
             JOptionPane.showMessageDialog(frame, "Cannot register Esc key.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        while (continue_autoplay.get()) {
-            continue_autoplay.set(autoplay_iteration(frame, width, height, interval));
+        while (continue_autoplay) {
+            continue_autoplay = continue_autoplay && autoplay_iteration(frame, width, height, interval);
             try {
                 Thread.sleep(interval);
             } catch (InterruptedException ex) {
@@ -274,6 +283,12 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        register = MinesweeperAutoplay.register_exit_key(() -> {
+        }, () -> {
+            if (continue_autoplay) {
+                continue_autoplay = false;
+            }
+        });
         JFrame frame = new JFrame("Minesweeper Determinator");
         try {
             BufferedImage icon = ScreenCapture.load_image_from_file("/images/icon.png");
@@ -282,7 +297,7 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        frame.setSize(300, 580);
+        frame.setSize(300, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
         Font bigFont = new Font("Arial", Font.BOLD, 32);
@@ -411,8 +426,10 @@ public class Main {
                 autoplay(frame, width_height.getFirst(), width_height.getSecond(), interval, new JButton[]{random_move_button, all_moves_button, auto_play_button}, auto_play_button);
             }
         });
+        JLabel label_3 = new JLabel("(Press Esc furiously to exit)");
+        label_3.setFont(smallFont);
         interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
-        JComponent[] components = {label_1, label_2, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, auto_play_button};
+        JComponent[] components = {label_1, label_2, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, auto_play_button, label_3};
         for (JComponent component : components) {
             centerComponent(component);
             frame.add(component);
