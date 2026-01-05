@@ -31,6 +31,9 @@ bin/
 **/.DS_Store
 libJNativeHook.arm64.dylib
 
+### Linux ###
+libJNativeHook.x86_64.so
+
 ### Maven ###
 target/
 pom.xml.tag
