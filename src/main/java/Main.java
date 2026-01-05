@@ -141,12 +141,12 @@ public class Main {
             } else if ('W' == status) {
                 JOptionPane.showMessageDialog(frame, "You won. Congratulations!", "Information", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
+                long start_time = System.currentTimeMillis();
+                ArrayList<Pair<int[], Character>> predictions = state.get_predictions(1, start_time + time_upper_limit);
                 if (null != predictions && predictions.isEmpty()) {
-                    long start_time = System.currentTimeMillis();
                     int layers = 2;
                     while (predictions.isEmpty() && layers <= layers_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
-                        predictions = state.get_predictions(layers++);
+                        predictions = state.get_predictions(layers++, start_time + time_upper_limit);
                     }
                 }
                 int[][][] marked_rgb_array;
@@ -207,12 +207,12 @@ public class Main {
                 JOptionPane.showMessageDialog(frame, "You won. Congratulations!", "Information", JOptionPane.INFORMATION_MESSAGE);
                 return false;
             } else {
-                ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
+                long start_time = System.currentTimeMillis();
+                ArrayList<Pair<int[], Character>> predictions = state.get_predictions(1, start_time + time_upper_limit);
                 if (null != predictions && predictions.isEmpty()) {
-                    long start_time = System.currentTimeMillis();
                     int layers = 2;
                     while (predictions.isEmpty() && layers <= layers_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
-                        predictions = state.get_predictions(layers++);
+                        predictions = state.get_predictions(layers++, start_time + time_upper_limit);
                     }
                 }
                 if (null != predictions && !predictions.isEmpty()) {
