@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JTextField;
 import javax.swing.JPanel;
 
@@ -47,10 +46,7 @@ public class Main {
                 int x = (pw - dw) / 2;
                 int y = (ph - dh) / 2;
                 g.drawImage(src, x, y, dw, dh, null);
-                ((Graphics2D) g).setRenderingHint(
-                        RenderingHints.KEY_INTERPOLATION,
-                        RenderingHints.VALUE_INTERPOLATION_BILINEAR
-                );
+                ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             }
         };
         f.setContentPane(p);
@@ -298,9 +294,9 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        frame.setSize(300, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         Font bigFont = new Font("Arial", Font.BOLD, 32);
         Font smallFont = new Font("Arial", Font.PLAIN, 20);
         JLabel label_1 = new JLabel("Minesweeper");
@@ -315,6 +311,7 @@ public class Main {
         layers_textField.setFont(smallFont);
         layers_inputPanel.add(layers_inputLabel);
         layers_inputPanel.add(layers_textField);
+        layers_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, layers_inputPanel.getPreferredSize().height));
         JPanel time_inputPanel = new JPanel();
         JLabel time_inputLabel = new JLabel("Search time upper limit: ");
         time_inputLabel.setFont(smallFont);
@@ -326,6 +323,7 @@ public class Main {
         time_inputPanel.add(time_inputLabel);
         time_inputPanel.add(time_textField);
         time_inputPanel.add(time_unitLabel);
+        time_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, time_inputPanel.getPreferredSize().height));
         JPanel width_inputPanel = new JPanel();
         JLabel width_inputLabel = new JLabel("Width: ");
         width_inputLabel.setFont(smallFont);
@@ -442,6 +440,7 @@ public class Main {
         interval_inputPanel.add(interval_inputLabel);
         interval_inputPanel.add(interval_textField);
         interval_inputPanel.add(interval_unitLabel);
+        interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
         JButton auto_play_button = new JButton("<html><center>Start autoplay</center></html>");
         auto_play_button.setFont(smallFont);
         auto_play_button.setMaximumSize(new Dimension(200, auto_play_button.getPreferredSize().height));
@@ -461,9 +460,15 @@ public class Main {
         JComponent[] components = {label_1, label_2, layers_inputPanel, time_inputPanel, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, auto_play_button, label_3};
         for (JComponent component : components) {
             centerComponent(component);
-            frame.add(component);
+            mainPanel.add(component);
         }
-        frame.add(Box.createVerticalGlue());
+        mainPanel.add(Box.createVerticalGlue());
+        JScrollPane scrollPane = new JScrollPane(mainPanel);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        frame.setContentPane(scrollPane);
+        frame.pack();
+        frame.setSize(frame.getWidth() + 20, frame.getHeight());
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setLocation((int) screenSize.getWidth() - frame.getWidth(), 0);
         frame.setAlwaysOnTop(true);
