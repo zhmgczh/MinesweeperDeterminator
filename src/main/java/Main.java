@@ -145,7 +145,7 @@ public class Main {
                 ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
                 if (null != predictions && predictions.isEmpty()) {
                     int layers = 2;
-                    while (!predictions.isEmpty() && layers <= 3) {
+                    while (predictions.isEmpty() && layers <= 3) {
                         predictions = state.get_predictions(layers++);
                     }
                 }
@@ -210,7 +210,7 @@ public class Main {
                 ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
                 if (null != predictions && predictions.isEmpty()) {
                     int layers = 2;
-                    while (!predictions.isEmpty() && layers <= 3) {
+                    while (predictions.isEmpty() && layers <= 3) {
                         predictions = state.get_predictions(layers++);
                     }
                 }

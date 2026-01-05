@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.*;
 
 public class MinesweeperScanner {
@@ -284,6 +285,7 @@ public class MinesweeperScanner {
     public static void main(String[] args) {
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty.png");
         ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/almost_final.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final.png");
         ScreenCapture.save_screen_to_file(screen, "Debug/captured_screen.png", "png");
         MinesweeperScanner minesweeperScanner = new MinesweeperScanner(30, 16);
@@ -291,6 +293,7 @@ public class MinesweeperScanner {
         System.out.println(state);
         ScreenCapture.save_array_to_file(state.get_map_rgb_array(2), "Debug/scanned.png", "png");
         ArrayList<Pair<int[], Character>> predictions = state.get_predictions();
+        Main.deleteRecursively(new File("Debug/predictions/"));
         int index = 0;
         for (Pair<int[], Character> prediction : predictions) {
             ScreenCapture.save_array_to_file(state.get_marked_rgb_array(prediction, 2), "Debug/predictions/prediction_" + index + ".png", "png");
