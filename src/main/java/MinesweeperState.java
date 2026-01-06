@@ -371,7 +371,7 @@ public class MinesweeperState {
         return blocks;
     }
 
-    private boolean search_failed(ArrayList<Pair<Integer, Integer>> target_points, int remaining_mines) {
+    private boolean search_unfinished(ArrayList<Pair<Integer, Integer>> target_points, int remaining_mines) {
         try {
             Thread.ofVirtual().start(() -> {
                 search(target_points, 0, remaining_mines);
@@ -432,10 +432,10 @@ public class MinesweeperState {
             ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
             all_points.clear();
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
-                all_points.addAll(block);
-                if (force_stopped || search_failed(block, remaining_mines)) {
+                if (force_stopped || search_unfinished(block, remaining_mines)) {
                     return predictions;
                 }
+                all_points.addAll(block);
             }
             if (blocks.size() != 1) {
                 boolean found = false;
@@ -449,7 +449,7 @@ public class MinesweeperState {
                     for (Pair<Integer, Integer> point : all_points) {
                         possibility_map.get(point).clear();
                     }
-                    if (force_stopped || search_failed(all_points, remaining_mines)) {
+                    if (force_stopped || search_unfinished(all_points, remaining_mines)) {
                         return predictions;
                     }
                 }
