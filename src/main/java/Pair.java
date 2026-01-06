@@ -2,7 +2,7 @@ public class Pair<T1, T2> {
     private final T1 first;
     private final T2 second;
 
-    public Pair(T1 first, T2 second) {
+    public Pair(final T1 first, final T2 second) {
         this.first = first;
         this.second = second;
     }
@@ -16,12 +16,10 @@ public class Pair<T1, T2> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
-        Pair<?, ?> pair = (Pair<?, ?>) o;
-
+        final Pair<?, ?> pair = (Pair<?, ?>) o;
         if (first != null ? !first.equals(pair.first) : pair.first != null) return false;
         return second != null ? second.equals(pair.second) : pair.second == null;
     }
@@ -35,6 +33,6 @@ public class Pair<T1, T2> {
 
     @Override
     public String toString() {
-        return "Pair{" + "first=" + first + ", second=" + second + '}';
+        return "(" + first + ", " + second + ')';
     }
 }

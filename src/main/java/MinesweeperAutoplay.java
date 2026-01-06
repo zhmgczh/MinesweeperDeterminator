@@ -16,9 +16,9 @@ public class MinesweeperAutoplay {
         }
     }
 
-    public static boolean single_move(Pair<int[], Character> prediction, MinesweeperScanner scanner, MinesweeperState state) {
-        int i = prediction.getFirst()[0];
-        int j = prediction.getFirst()[1];
+    public static boolean single_move(Pair<Pair<Integer, Integer>, Character> prediction, MinesweeperScanner scanner, MinesweeperState state) {
+        int i = prediction.getFirst().getFirst();
+        int j = prediction.getFirst().getSecond();
         char current = state.get_state(i, j);
         int[] grid_coordinates = scanner.get_grid_coordinates(i, j);
         if (grid_coordinates != null) {
@@ -39,9 +39,9 @@ public class MinesweeperAutoplay {
         }
     }
 
-    public static boolean iteration(ArrayList<Pair<int[], Character>> predictions, int interval, MinesweeperScanner scanner, MinesweeperState state) {
+    public static boolean iteration(ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions, int interval, MinesweeperScanner scanner, MinesweeperState state) {
         boolean successful = true;
-        for (Pair<int[], Character> prediction : predictions) {
+        for (Pair<Pair<Integer, Integer>, Character> prediction : predictions) {
             successful = single_move(prediction, scanner, state);
             try {
                 Thread.sleep(interval);

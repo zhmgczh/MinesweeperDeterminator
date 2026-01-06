@@ -138,7 +138,7 @@ public class Main {
                 JOptionPane.showMessageDialog(frame, "You won. Congratulations!", "Information", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 long start_time = System.currentTimeMillis();
-                ArrayList<Pair<int[], Character>> predictions = state.get_predictions(1, start_time + time_upper_limit);
+                ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.get_predictions(1, start_time + time_upper_limit);
                 if (null != predictions && predictions.isEmpty()) {
                     int layers = 2;
                     while (predictions.isEmpty() && layers <= layers_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
@@ -152,7 +152,7 @@ public class Main {
                         if (debug) {
                             deleteRecursively(new File("Debug/predictions/"));
                             int index = 0;
-                            for (Pair<int[], Character> prediction : predictions) {
+                            for (Pair<Pair<Integer, Integer>, Character> prediction : predictions) {
                                 ScreenCapture.save_array_to_file(state.get_marked_rgb_array(prediction, 2), "Debug/predictions/prediction_" + index + ".png", "png");
                                 ++index;
                             }
@@ -204,7 +204,7 @@ public class Main {
                 return false;
             } else {
                 long start_time = System.currentTimeMillis();
-                ArrayList<Pair<int[], Character>> predictions = state.get_predictions(1, start_time + time_upper_limit);
+                ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.get_predictions(1, start_time + time_upper_limit);
                 if (null != predictions && predictions.isEmpty()) {
                     int layers = 2;
                     while (predictions.isEmpty() && layers <= layers_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
