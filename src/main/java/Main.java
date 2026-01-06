@@ -240,6 +240,29 @@ public class Main {
     static boolean continue_autoplay;
     static AutoCloseable register;
 
+//    private static void autoplay(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
+//        prepare_autoplay(buttons, autoplay_button);
+//        continue_autoplay = true;
+//        if (null == register) {
+//            JOptionPane.showMessageDialog(frame, "Cannot register Esc key.", "Error", JOptionPane.ERROR_MESSAGE);
+//            return;
+//        }
+//        while (continue_autoplay) {
+//            continue_autoplay = continue_autoplay && autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit);
+//            try {
+//                Thread.sleep(interval);
+//            } catch (InterruptedException ex) {
+//                ex.printStackTrace();
+//            }
+//        }
+//        try {
+//            register.close();
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//        after_autoplay(buttons, autoplay_button);
+//    }
+
     private static void autoplay(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
         prepare_autoplay(buttons, autoplay_button);
         continue_autoplay = true;
@@ -247,20 +270,23 @@ public class Main {
             JOptionPane.showMessageDialog(frame, "Cannot register Esc key.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        while (continue_autoplay) {
-            continue_autoplay = continue_autoplay && autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit);
+        new Thread(() -> {
+            while (continue_autoplay) {
+                continue_autoplay = continue_autoplay && autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit);
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                    break;
+                }
+            }
             try {
-                Thread.sleep(interval);
-            } catch (InterruptedException ex) {
+                register.close();
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        }
-        try {
-            register.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        after_autoplay(buttons, autoplay_button);
+            SwingUtilities.invokeLater(() -> after_autoplay(buttons, autoplay_button));
+        }).start();
     }
 
     public static void deleteRecursively(File file) {
