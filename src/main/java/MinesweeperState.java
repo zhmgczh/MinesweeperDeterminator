@@ -294,12 +294,6 @@ public class MinesweeperState {
                 if (force_finished && is_unfinished_operand(temp_map[i][j])) {
                     return false;
                 }
-                if (!is_valid_operand(map[i][j])) {
-                    return false;
-                }
-                if (is_number(map[i][j]) && !check_number_valid(map, i, j, force_finished)) {
-                    return false;
-                }
             }
         }
         return remaining_mines <= blanks;
@@ -366,6 +360,17 @@ public class MinesweeperState {
         return blocks;
     }
 
+    private boolean search_for(ArrayList<Pair<Integer, Integer>> all_points, int remaining_mines) {
+        try {
+            Thread.ofVirtual().start(() -> {
+                search(all_points, 0, remaining_mines);
+            }).join();
+            return true;
+        } catch (InterruptedException e) {
+            return false;
+        }
+    }
+
     public ArrayList<Pair<Pair<Integer, Integer>, Character>> get_predictions(int layers, long search_stop_before) {
         MinesweeperState.search_stop_before = search_stop_before;
         force_stopped = false;
@@ -415,17 +420,28 @@ public class MinesweeperState {
             }
             ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
-                try {
-                    Thread.ofVirtual().start(() -> {
-                        search(block, 0, remaining_mines);
-                    }).join();
-                } catch (InterruptedException e) {
-                    return predictions;
-                }
-                if (force_stopped) {
+                if (force_stopped || !search_for(block, remaining_mines)) {
                     return predictions;
                 }
             }
+            if (blocks.size() != 1) {
+                boolean found = false;
+                for (Pair<Integer, Integer> point : all_points) {
+                    if (1 == possibility_map.get(point).size()) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    for (Pair<Integer, Integer> point : all_points) {
+                        possibility_map.get(point).clear();
+                    }
+                    if (force_stopped || !search_for(all_points, remaining_mines)) {
+                        return predictions;
+                    }
+                }
+            }
+
         }
         for (Pair<Integer, Integer> point : all_points) {
             HashSet<Character> possibility_set = possibility_map.get(point);
