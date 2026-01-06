@@ -348,6 +348,11 @@ public class MinesweeperState {
                     if (new_x >= 0 && new_x < nrows && new_y >= 0 && new_y < ncols && prediction_tag[new_x][new_y]) {
                         set.union(point, new Pair<>(new_x, new_y));
                     }
+                    new_x += unit_vector[0];
+                    new_y += unit_vector[1];
+                    if (new_x >= 0 && new_x < nrows && new_y >= 0 && new_y < ncols && prediction_tag[new_x][new_y]) {
+                        set.union(point, new Pair<>(new_x, new_y));
+                    }
                 }
             }
         }
@@ -425,7 +430,9 @@ public class MinesweeperState {
                 }
             }
             ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
+            all_points.clear();
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
+                all_points.addAll(block);
                 if (force_stopped || search_failed(block, remaining_mines)) {
                     return predictions;
                 }
