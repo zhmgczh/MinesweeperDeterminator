@@ -1,19 +1,23 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class UnionFindSet<T> {
     private final int[] parent;
     private final ArrayList<T> objects;
     private final HashMap<T, Integer> map;
 
-    public UnionFindSet(final ArrayList<T> objects) {
+    public UnionFindSet(final HashSet<T> objects) {
         int n = objects.size();
         parent = new int[n];
-        this.objects = objects;
+        this.objects = new ArrayList<>(n);
         map = new HashMap<>();
-        for (int i = 0; i < n; ++i) {
-            map.put(objects.get(i), i);
-            parent[i] = i;
+        int index = 0;
+        for (T object : objects) {
+            this.objects.add(object);
+            map.put(object, index);
+            parent[index] = index;
+            ++index;
         }
     }
 

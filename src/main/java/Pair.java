@@ -26,9 +26,7 @@ public class Pair<T1, T2> {
 
     @Override
     public int hashCode() {
-        int result = first != null ? first.hashCode() : 0;
-        result = 31 * result + (second != null ? second.hashCode() : 0);
-        return result;
+        return java.util.Objects.hash(first, second);
     }
 
     @Override

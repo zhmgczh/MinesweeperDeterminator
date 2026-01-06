@@ -339,7 +339,7 @@ public class MinesweeperState {
     private boolean[][] prediction_tag;
 
     private ArrayList<ArrayList<Pair<Integer, Integer>>> get_blocks() {
-        UnionFindSet<Pair<Integer, Integer>> set = new UnionFindSet<>(all_points);
+        UnionFindSet<Pair<Integer, Integer>> set = new UnionFindSet<>(new HashSet<>(all_points));
         for (Pair<Integer, Integer> point : all_points) {
             if (prediction_tag[point.getFirst()][point.getSecond()]) {
                 for (int[] unit_vector : unit_vectors) {
