@@ -79,10 +79,7 @@ public class ScreenCapture {
                 int r = rgb_array[x][y][0];
                 int g = rgb_array[x][y][1];
                 int b = rgb_array[x][y][2];
-                int pixel = (0xFF << 24) |
-                        (r << 16) |
-                        (g << 8) |
-                        b;
+                int pixel = (0xFF << 24) | (r << 16) | (g << 8) | b;
                 image.setRGB(x, y, pixel);
             }
         }

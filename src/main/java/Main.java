@@ -237,31 +237,8 @@ public class Main {
         autoplay_button.setText("<html><center>Start autoplay</center></html>");
     }
 
-    static boolean continue_autoplay;
+    static volatile boolean continue_autoplay;
     static AutoCloseable register;
-
-//    private static void autoplay(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
-//        prepare_autoplay(buttons, autoplay_button);
-//        continue_autoplay = true;
-//        if (null == register) {
-//            JOptionPane.showMessageDialog(frame, "Cannot register Esc key.", "Error", JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
-//        while (continue_autoplay) {
-//            continue_autoplay = continue_autoplay && autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit);
-//            try {
-//                Thread.sleep(interval);
-//            } catch (InterruptedException ex) {
-//                ex.printStackTrace();
-//            }
-//        }
-//        try {
-//            register.close();
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-//        after_autoplay(buttons, autoplay_button);
-//    }
 
     private static void autoplay(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
         prepare_autoplay(buttons, autoplay_button);
@@ -270,23 +247,31 @@ public class Main {
             JOptionPane.showMessageDialog(frame, "Cannot register Esc key.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        Thread workerThread = new Thread(() -> {
+            try {
+                while (continue_autoplay && !Thread.currentThread().isInterrupted()) {
+                    boolean result = autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit);
+                    if (!result) {
+                        continue_autoplay = false;
+                        break;
+                    }
+                    Thread.sleep(interval);
+                }
+            } catch (InterruptedException _) {
+            }
+        });
         new Thread(() -> {
             while (continue_autoplay) {
-                continue_autoplay = continue_autoplay && autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit);
                 try {
-                    Thread.sleep(interval);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
                     break;
                 }
             }
-            try {
-                register.close();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            workerThread.interrupt();
             SwingUtilities.invokeLater(() -> after_autoplay(buttons, autoplay_button));
         }).start();
+        workerThread.start();
     }
 
     public static void deleteRecursively(File file) {
@@ -480,7 +465,7 @@ public class Main {
                 autoplay(frame, width, height, interval, layers_upper_limit, time_upper_limit, new JButton[]{random_move_button, all_moves_button, auto_play_button}, auto_play_button);
             }
         });
-        JLabel label_3 = new JLabel("(Press Esc furiously to exit)");
+        JLabel label_3 = new JLabel("(Press Esc to exit autoplay)");
         label_3.setFont(smallFont);
         interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
         JComponent[] components = {label_1, label_2, layers_inputPanel, time_inputPanel, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, auto_play_button, label_3};

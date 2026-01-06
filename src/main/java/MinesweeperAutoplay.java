@@ -46,7 +46,7 @@ public class MinesweeperAutoplay {
             try {
                 Thread.sleep(interval);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                break;
             }
             if (!successful) {
                 break;

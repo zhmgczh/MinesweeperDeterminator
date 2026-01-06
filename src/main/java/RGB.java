@@ -294,10 +294,7 @@ public class RGB {
                 double dx = x - x1;
                 double dy = y - y1;
                 for (int c = 0; c < 3; c++) {
-                    double val = original[x1][y1][c] * (1 - dx) * (1 - dy) +
-                            original[x2][y1][c] * dx * (1 - dy) +
-                            original[x1][y2][c] * (1 - dx) * dy +
-                            original[x2][y2][c] * dx * dy;
+                    double val = original[x1][y1][c] * (1 - dx) * (1 - dy) + original[x2][y1][c] * dx * (1 - dy) + original[x1][y2][c] * (1 - dx) * dy + original[x2][y2][c] * dx * dy;
                     resized[i][j][c] = (int) Math.round(val);
                 }
             }

@@ -191,8 +191,7 @@ public class MinesweeperState {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Time passed: ").append(time_passed).append(" Remaining mines: ").append(remaining_mines).
-                append("\nWidth: ").append(nrows).append(" Height: ").append(ncols).append('\n');
+        sb.append("Time passed: ").append(time_passed).append(" Remaining mines: ").append(remaining_mines).append("\nWidth: ").append(nrows).append(" Height: ").append(ncols).append('\n');
         for (int i = 0; i < ncols; ++i) {
             sb.append(map[0][i]);
             for (int j = 1; j < nrows; ++j) {

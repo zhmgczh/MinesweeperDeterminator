@@ -21,8 +21,7 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 
 public final class GlobalHotkeyMouseClicker implements NativeKeyListener, AutoCloseable {
     public enum MouseButton {
-        LEFT(1),
-        RIGHT(3);
+        LEFT(1), RIGHT(3);
         private final int awtButtonNumber;
 
         MouseButton(int awtButtonNumber) {
@@ -142,7 +141,6 @@ public final class GlobalHotkeyMouseClicker implements NativeKeyListener, AutoCl
 
     @Override
     public void nativeKeyTyped(NativeKeyEvent e) {
-        // 不用 typed（組合鍵通常看 pressed/released）
     }
 
     private void evaluateHotkeys() {
@@ -164,21 +162,14 @@ public final class GlobalHotkeyMouseClicker implements NativeKeyListener, AutoCl
     }
 
     public static void main(String[] args) throws Exception {
-        try (GlobalHotkeyMouseClicker app = new GlobalHotkeyMouseClicker()
-                .bindHotkey(
-                        hotkey(NativeKeyEvent.VC_CONTROL, NativeKeyEvent.VC_ALT, NativeKeyEvent.VC_F8),
-                        () -> {
-                            System.out.println("Hotkey: Ctrl+Alt+F8 -> LEFT click (500,500)");
-                            appClickSafe(500, 500, MouseButton.LEFT);
-                        })
-                .bindHotkey(
-                        hotkey(NativeKeyEvent.VC_CONTROL, NativeKeyEvent.VC_ALT, NativeKeyEvent.VC_F9),
-                        () -> {
-                            Point p = currentMousePosition();
-                            System.out.println("Hotkey: Ctrl+Alt+F9 -> RIGHT click at " + p);
-                            appClickSafe(p.x, p.y, MouseButton.RIGHT);
-                        })
-        ) {
+        try (GlobalHotkeyMouseClicker app = new GlobalHotkeyMouseClicker().bindHotkey(hotkey(NativeKeyEvent.VC_CONTROL, NativeKeyEvent.VC_ALT, NativeKeyEvent.VC_F8), () -> {
+            System.out.println("Hotkey: Ctrl+Alt+F8 -> LEFT click (500,500)");
+            appClickSafe(500, 500, MouseButton.LEFT);
+        }).bindHotkey(hotkey(NativeKeyEvent.VC_CONTROL, NativeKeyEvent.VC_ALT, NativeKeyEvent.VC_F9), () -> {
+            Point p = currentMousePosition();
+            System.out.println("Hotkey: Ctrl+Alt+F9 -> RIGHT click at " + p);
+            appClickSafe(p.x, p.y, MouseButton.RIGHT);
+        })) {
             app.start();
             System.out.println("Started. Press Ctrl+Alt+F8 or Ctrl+Alt+F9. Press ESC to quit.");
             app.bindHotkey(hotkey(NativeKeyEvent.VC_ESCAPE), () -> {

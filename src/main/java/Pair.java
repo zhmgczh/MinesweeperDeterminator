@@ -35,9 +35,6 @@ public class Pair<T1, T2> {
 
     @Override
     public String toString() {
-        return "Pair{" +
-                "first=" + first +
-                ", second=" + second +
-                '}';
+        return "Pair{" + "first=" + first + ", second=" + second + '}';
     }
 }

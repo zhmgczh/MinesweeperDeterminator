@@ -260,18 +260,8 @@ public class MinesweeperScanner {
         assert screen != null;
         int panel_coordinates[] = find_panel_coordinates(screen);
         int remaining_mines_and_times_coordinates[] = find_remaining_mines_and_time_coordinates(screen, panel_coordinates);
-        int remaining_mines = convert_digits_to_integer(get_digits(screen,
-                remaining_mines_and_times_coordinates[0],
-                remaining_mines_and_times_coordinates[1],
-                remaining_mines_and_times_coordinates[2],
-                remaining_mines_and_times_coordinates[3],
-                3));
-        int time_passed = convert_digits_to_integer(get_digits(screen,
-                remaining_mines_and_times_coordinates[4],
-                remaining_mines_and_times_coordinates[5],
-                remaining_mines_and_times_coordinates[6],
-                remaining_mines_and_times_coordinates[7],
-                3));
+        int remaining_mines = convert_digits_to_integer(get_digits(screen, remaining_mines_and_times_coordinates[0], remaining_mines_and_times_coordinates[1], remaining_mines_and_times_coordinates[2], remaining_mines_and_times_coordinates[3], 3));
+        int time_passed = convert_digits_to_integer(get_digits(screen, remaining_mines_and_times_coordinates[4], remaining_mines_and_times_coordinates[5], remaining_mines_and_times_coordinates[6], remaining_mines_and_times_coordinates[7], 3));
         int board_coordinates[] = find_board_coordinates(screen, panel_coordinates);
         this.board_coordinates = board_coordinates;
         char map[][] = get_map(screen, board_coordinates, debug);
