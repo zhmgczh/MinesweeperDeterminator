@@ -291,13 +291,15 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        JFrame frame = new JFrame("Minesweeper Determinator");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         register = MinesweeperAutoplay.register_exit_key(() -> {
         }, () -> {
             if (continue_autoplay) {
                 continue_autoplay = false;
+                JOptionPane.showMessageDialog(frame, "You stopped autoplay manually.", "Warning", JOptionPane.WARNING_MESSAGE);
             }
         });
-        JFrame frame = new JFrame("Minesweeper Determinator");
         try {
             BufferedImage icon = ScreenCapture.load_image_from_file("/images/icon.png");
             frame.setIconImage(icon);
@@ -305,7 +307,6 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         Font bigFont = new Font("Arial", Font.BOLD, 32);

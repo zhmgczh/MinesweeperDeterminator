@@ -382,7 +382,7 @@ public class MinesweeperState {
                     search(0, remaining_mines);
                 }).join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                return predictions;
             }
             if (force_stopped) {
                 return predictions;
