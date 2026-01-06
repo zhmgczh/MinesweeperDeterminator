@@ -365,8 +365,10 @@ public class MinesweeperState {
             block_map.get(root).add(point);
         }
         ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = new ArrayList<>();
+        all_points.clear();
         for (Pair<Integer, Integer> root : block_map.keySet()) {
             blocks.add(block_map.get(root));
+            all_points.addAll(block_map.get(root));
         }
         return blocks;
     }
@@ -430,12 +432,10 @@ public class MinesweeperState {
                 }
             }
             ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
-            all_points.clear();
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
                 if (force_stopped || search_unfinished(block, remaining_mines)) {
                     return predictions;
                 }
-                all_points.addAll(block);
             }
             if (blocks.size() != 1) {
                 boolean found = false;
