@@ -306,30 +306,33 @@ public class MinesweeperState {
     }
 
     private void search(int point_index, int remaining_mines) {
+        if (force_stopped) {
+            return;
+        }
         if (System.currentTimeMillis() > search_stop_before) {
             force_stopped = true;
             return;
         }
-        if (remaining_mines >= 0) {
-            if (point_index == all_points.size()) {
-                if (check_temp_map_valid(remaining_mines, false)) {
-                    for (int[] point : all_points) {
-                        possibility_map.get(point).add(temp_map[point[0]][point[1]]);
-                    }
+        if (point_index == all_points.size()) {
+            if (check_temp_map_valid(remaining_mines, false)) {
+                for (int[] point : all_points) {
+                    possibility_map.get(point).add(temp_map[point[0]][point[1]]);
                 }
-            } else {
-                int x = all_points.get(point_index)[0];
-                int y = all_points.get(point_index)[1];
-                temp_map[x][y] = ZERO;
-                if (check_position_valid(x, y)) {
-                    search(point_index + 1, remaining_mines);
-                }
+            }
+        } else {
+            int x = all_points.get(point_index)[0];
+            int y = all_points.get(point_index)[1];
+            temp_map[x][y] = ZERO;
+            if (check_position_valid(x, y)) {
+                search(point_index + 1, remaining_mines);
+            }
+            if (remaining_mines > 0) {
                 temp_map[x][y] = MINE_FLAG;
                 if (check_position_valid(x, y)) {
                     search(point_index + 1, remaining_mines - 1);
                 }
-                temp_map[x][y] = BLANK;
             }
+            temp_map[x][y] = BLANK;
         }
     }
 
@@ -341,12 +344,14 @@ public class MinesweeperState {
         HashMap<int[], Integer> point_layer = new HashMap<>();
         boolean[][] visited = new boolean[nrows][ncols];
         for (int layer = 0; layer < layers; ++layer) {
-            for (int i = 0; i < nrows; ++i) {
-                for (int j = 0; j < ncols; ++j) {
-                    for (int[] unit_vector : unit_vectors) {
+            for (int[] unit_vector : unit_vectors) {
+                int vector_x = (layer + 1) * unit_vector[0];
+                int vector_y = (layer + 1) * unit_vector[1];
+                for (int i = 0; i < nrows; ++i) {
+                    for (int j = 0; j < ncols; ++j) {
                         if (is_number(map[i][j])) {
-                            int new_x = i + (layer + 1) * unit_vector[0];
-                            int new_y = j + (layer + 1) * unit_vector[1];
+                            int new_x = i + vector_x;
+                            int new_y = j + vector_y;
                             if (new_x >= 0 && new_x < nrows && new_y >= 0 && new_y < ncols && !visited[new_x][new_y] && (BLANK == map[new_x][new_y] || QUESTION_MARK == map[new_x][new_y])) {
                                 int[] point = new int[]{new_x, new_y};
                                 all_points.add(point);
