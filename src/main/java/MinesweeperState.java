@@ -189,16 +189,22 @@ public class MinesweeperState {
         return ' ';
     }
 
-    public String toString() {
+    public static String get_map_as_string(char[][] map) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Time passed: ").append(time_passed).append(" Remaining mines: ").append(remaining_mines).append("\nWidth: ").append(nrows).append(" Height: ").append(ncols).append('\n');
-        for (int i = 0; i < ncols; ++i) {
+        for (int i = 0; i < map[0].length; ++i) {
             sb.append(map[0][i]);
-            for (int j = 1; j < nrows; ++j) {
+            for (int j = 1; j < map.length; ++j) {
                 sb.append(' ').append(map[j][i]);
             }
             sb.append('\n');
         }
+        return sb.toString();
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Time passed: ").append(time_passed).append(" Remaining mines: ").append(remaining_mines).append("\nWidth: ").append(nrows).append(" Height: ").append(ncols).append('\n');
+        sb.append(get_map_as_string(map));
         return sb.toString();
     }
 
@@ -360,12 +366,12 @@ public class MinesweeperState {
         return blocks;
     }
 
-    private boolean search_for(ArrayList<Pair<Integer, Integer>> all_points, int remaining_mines) {
+    private boolean search_for(ArrayList<Pair<Integer, Integer>> target_points, int remaining_mines) {
         try {
             Thread.ofVirtual().start(() -> {
-                search(all_points, 0, remaining_mines);
+                search(target_points, 0, remaining_mines);
             }).join();
-            return true;
+            return !force_stopped;
         } catch (InterruptedException e) {
             return false;
         }
@@ -441,7 +447,6 @@ public class MinesweeperState {
                     }
                 }
             }
-
         }
         for (Pair<Integer, Integer> point : all_points) {
             HashSet<Character> possibility_set = possibility_map.get(point);
@@ -453,5 +458,22 @@ public class MinesweeperState {
         }
         predictions.sort(Comparator.comparingInt(o -> point_layer[o.getFirst().getFirst()][o.getFirst().getSecond()]));
         return predictions;
+    }
+
+    public static void main(String[] args) {
+        char[][] maps = new char[30][16];
+        for (int row = 0; row < 30; ++row) {
+            for (int col = 0; col < 16; ++col) {
+                maps[row][col] = BLANK;
+            }
+        }
+        maps[14][3] = THREE;
+        maps[15][3] = THREE;
+        maps[15][2] = ONE;
+        System.out.println(get_map_as_string(maps));
+        int remaining_mines = 99;
+        MinesweeperState state = new MinesweeperState(0, remaining_mines, maps);
+        long start_time = System.currentTimeMillis();
+        System.out.println(state.get_predictions(3, start_time + 10000));
     }
 }
