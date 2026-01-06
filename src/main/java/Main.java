@@ -248,16 +248,12 @@ public class Main {
             return;
         }
         Thread workerThread = new Thread(() -> {
-            try {
-                while (continue_autoplay && !Thread.currentThread().isInterrupted()) {
-                    boolean result = autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit);
-                    if (!result) {
-                        continue_autoplay = false;
-                        break;
-                    }
-                    Thread.sleep(interval);
+            while (continue_autoplay && !Thread.currentThread().isInterrupted()) {
+                boolean result = autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit);
+                if (!result) {
+                    continue_autoplay = false;
+                    break;
                 }
-            } catch (InterruptedException _) {
             }
         });
         new Thread(() -> {
