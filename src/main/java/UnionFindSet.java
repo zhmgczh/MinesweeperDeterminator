@@ -21,6 +21,10 @@ public class UnionFindSet<T> {
         }
     }
 
+    public HashSet<T> get_objects() {
+        return new HashSet<>(objects);
+    }
+
     private int find(final int x) {
         if (parent[x] != x) {
             parent[x] = find(parent[x]);
