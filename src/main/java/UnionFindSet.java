@@ -18,7 +18,7 @@ public class UnionFindSet<T> {
         parent = new int[count];
         rank = new int[count];
         this.objects = new ArrayList<>(objects);
-        map = new HashMap<>((int) (count / 0.75) + 1);
+        map = new HashMap<>((int) (count / 0.75f) + 1);
         for (int i = 0; i < count; ++i) {
             map.put(this.objects.get(i), i);
             parent[i] = i;
