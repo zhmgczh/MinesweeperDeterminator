@@ -101,6 +101,16 @@ public class Main {
         return ScreenCapture.convert_image_to_screen(image);
     }
 
+    private static void set_font(Font font, JPanel time_inputPanel, JLabel time_inputLabel, JTextField time_textField) {
+        time_textField.setFont(font);
+        JLabel time_unitLabel = new JLabel("s");
+        time_unitLabel.setFont(font);
+        time_inputPanel.add(time_inputLabel);
+        time_inputPanel.add(time_textField);
+        time_inputPanel.add(time_unitLabel);
+        time_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, time_inputPanel.getPreferredSize().height));
+    }
+
     public static JFrame makeFlipFrame(JFrame frame, final BufferedImage img1, final BufferedImage img2) {
         frame.setVisible(false);
         final JFrame f = new JFrame();
@@ -253,6 +263,10 @@ public class Main {
         return false;
     }
 
+    static volatile boolean continue_autoplay;
+    static volatile boolean autoplay_stopped_manually;
+    static AutoCloseable register;
+
     private static void prepare_autoplay(JButton[] buttons, JButton autoplay_button) {
         change_autoplay_button(autoplay_button);
         for (JButton button : buttons) {
@@ -260,28 +274,27 @@ public class Main {
         }
     }
 
-    private static void after_autoplay(JButton[] buttons, JButton autoplay_button) {
+    private static void after_autoplay(JFrame frame, JButton[] buttons, JButton autoplay_button) {
         for (JButton button : buttons) {
             button.setEnabled(true);
         }
         initialize_autoplay_button(autoplay_button);
+        if (autoplay_stopped_manually) {
+            autoplay_stopped_manually_warning(frame);
+        }
     }
-
-
-    static volatile boolean continue_autoplay;
-    static AutoCloseable register;
 
     private static void autoplay(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
         prepare_autoplay(buttons, autoplay_button);
         continue_autoplay = true;
+        autoplay_stopped_manually = false;
         if (null == register) {
             esc_key_cannot_register_warning(frame);
             return;
         }
         Thread workerThread = new Thread(() -> {
             while (continue_autoplay && !Thread.currentThread().isInterrupted()) {
-                boolean result = autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit);
-                if (!result) {
+                if (!autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit)) {
                     continue_autoplay = false;
                     break;
                 }
@@ -296,7 +309,7 @@ public class Main {
                 }
             }
             workerThread.interrupt();
-            SwingUtilities.invokeLater(() -> after_autoplay(buttons, autoplay_button));
+            SwingUtilities.invokeLater(() -> after_autoplay(frame, buttons, autoplay_button));
         }).start();
         workerThread.start();
     }
@@ -323,8 +336,8 @@ public class Main {
         register = MinesweeperAutoplay.register_exit_key(() -> {
         }, () -> {
             if (continue_autoplay) {
+                autoplay_stopped_manually = true;
                 continue_autoplay = false;
-                autoplay_stopped_manually_warning(frame);
             }
         });
         try {
@@ -356,13 +369,7 @@ public class Main {
         time_inputLabel.setFont(smallFont);
         JTextField time_textField = new JTextField(2);
         time_textField.setText("10");
-        time_textField.setFont(smallFont);
-        JLabel time_unitLabel = new JLabel("s");
-        time_unitLabel.setFont(smallFont);
-        time_inputPanel.add(time_inputLabel);
-        time_inputPanel.add(time_textField);
-        time_inputPanel.add(time_unitLabel);
-        time_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, time_inputPanel.getPreferredSize().height));
+        set_font(smallFont, time_inputPanel, time_inputLabel, time_textField);
         JPanel width_inputPanel = new JPanel();
         JLabel width_inputLabel = new JLabel("Width: ");
         width_inputLabel.setFont(smallFont);
@@ -473,13 +480,7 @@ public class Main {
         interval_inputLabel.setFont(smallFont);
         JTextField interval_textField = new JTextField(3);
         interval_textField.setText("0.1");
-        interval_textField.setFont(smallFont);
-        JLabel interval_unitLabel = new JLabel("s");
-        interval_unitLabel.setFont(smallFont);
-        interval_inputPanel.add(interval_inputLabel);
-        interval_inputPanel.add(interval_textField);
-        interval_inputPanel.add(interval_unitLabel);
-        interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
+        set_font(smallFont, interval_inputPanel, interval_inputLabel, interval_textField);
         JButton autoplay_button = new JButton();
         initialize_autoplay_button(autoplay_button);
         autoplay_button.setFont(smallFont);
