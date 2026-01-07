@@ -554,7 +554,7 @@ public class Main {
                 autoplay(frame, width, height, interval, layers_upper_limit, time_upper_limit, all_buttons, autoplay_button);
             }
         });
-        JLabel label_3 = new JLabel("(Press Esc to stop autoplay)");
+        JLabel label_3 = new JLabel("(Press Esc to stop computation)");
         label_3.setFont(smallFont);
         interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
         JComponent[] components = {label_1, label_2, layers_inputPanel, time_inputPanel, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, autoplay_button, label_3};

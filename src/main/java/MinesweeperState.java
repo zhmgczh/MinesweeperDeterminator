@@ -420,18 +420,20 @@ public class MinesweeperState {
         prediction_tag = new boolean[nrows][ncols];
         boolean[][] visited = new boolean[nrows][ncols];
         for (int layer = 0; layer < layers; ++layer) {
-            for (int[] unit_vector : unit_vectors) {
-                int vector_x = (layer + 1) * unit_vector[0];
-                int vector_y = (layer + 1) * unit_vector[1];
-                for (int i = 0; i < nrows; ++i) {
-                    for (int j = 0; j < ncols; ++j) {
-                        if (is_number(map[i][j])) {
-                            int new_x = i + vector_x;
-                            int new_y = j + vector_y;
-                            if (new_x >= 0 && new_x < nrows && new_y >= 0 && new_y < ncols && !visited[new_x][new_y] && (BLANK == map[new_x][new_y] || QUESTION_MARK == map[new_x][new_y])) {
-                                all_points.add(new Pair<>(new_x, new_y));
-                                prediction_tag[new_x][new_y] = true;
-                                visited[new_x][new_y] = true;
+            for (int i = 0; i < nrows; ++i) {
+                for (int j = 0; j < ncols; ++j) {
+                    if (is_number(map[i][j])) {
+                        int min_i = Math.max(0, i - (layer + 1));
+                        int max_i = Math.min(nrows - 1, i + (layer + 1));
+                        int min_j = Math.max(0, j - (layer + 1));
+                        int max_j = Math.min(ncols - 1, j + (layer + 1));
+                        for (int new_i = min_i; new_i <= max_i; ++new_i) {
+                            for (int new_j = min_j; new_j <= max_j; ++new_j) {
+                                if (!visited[new_i][new_j] && (BLANK == map[new_i][new_j] || QUESTION_MARK == map[new_i][new_j])) {
+                                    all_points.add(new Pair<>(new_i, new_j));
+                                    prediction_tag[new_i][new_j] = true;
+                                    visited[new_i][new_j] = true;
+                                }
                             }
                         }
                     }
