@@ -68,6 +68,10 @@ public class Main {
         JOptionPane.showMessageDialog(frame, "Didn't find your minesweeper board.", "Warning", JOptionPane.WARNING_MESSAGE);
     }
 
+    private static void illegal_board_warning(JFrame frame) {
+        JOptionPane.showMessageDialog(frame, "The board is illegal. You have to fix it.", "Warning", JOptionPane.WARNING_MESSAGE);
+    }
+
     private static void prediction_not_found_warning(JFrame frame) {
         JOptionPane.showMessageDialog(frame, "Cannot find any move. You have to guess.", "Information", JOptionPane.INFORMATION_MESSAGE);
     }
@@ -208,7 +212,9 @@ public class Main {
             if (check_status(state, frame)) {
                 ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_layers_and_time_get_prediction(layers_upper_limit, time_upper_limit);
                 int[][][] marked_rgb_array;
-                if (null != predictions && !predictions.isEmpty()) {
+                if (null == predictions) {
+                    illegal_board_warning(frame);
+                } else if (!predictions.isEmpty()) {
                     if (all) {
                         marked_rgb_array = state.get_marked_rgb_array(predictions, 2);
                         debug_all_predictions(predictions, state, marked_rgb_array);
@@ -247,7 +253,9 @@ public class Main {
             }
             if (check_status(state, frame)) {
                 ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_layers_and_time_get_prediction(layers_upper_limit, time_upper_limit);
-                if (null != predictions && !predictions.isEmpty()) {
+                if (null == predictions) {
+                    illegal_board_warning(frame);
+                } else if (!predictions.isEmpty()) {
                     return MinesweeperAutoplay.iteration(predictions, interval, minesweeperScanner, state);
                 } else if (!autoplay_stopped_manually) {
                     prediction_not_found_warning(frame);

@@ -504,7 +504,7 @@ public class MinesweeperState {
         ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = get_predictions(1, start_time + time_upper_limit);
         if (null != predictions && predictions.isEmpty()) {
             int layers = 2;
-            while (!force_stopped && predictions.isEmpty() && layers <= layers_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
+            while (!force_stopped && null != predictions && predictions.isEmpty() && layers <= layers_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
                 predictions = get_predictions(layers++, start_time + time_upper_limit);
             }
         }
