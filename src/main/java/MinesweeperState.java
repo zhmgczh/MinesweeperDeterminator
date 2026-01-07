@@ -56,10 +56,12 @@ public class MinesweeperState {
         }
     }
 
-    public MinesweeperState(int time_passed, int remaining_mines, char[][] map) {
+    public MinesweeperState(int time_passed, int remaining_mines, char[][] map) throws IllegalArgumentException {
         assert time_passed >= 0 && time_passed <= 999 && remaining_mines >= 0;
         assert null != map && map.length > 0 && null != map[0] && map[0].length > 0;
-        assert check_map_valid(map, remaining_mines, false);
+        if (!check_map_valid(map, remaining_mines, false)) {
+            throw new IllegalMapException("The map is invalid.");
+        }
         this.time_passed = time_passed;
         this.remaining_mines = remaining_mines;
         this.map = map;

@@ -76,8 +76,8 @@ public class Main {
         JOptionPane.showMessageDialog(frame, "Cannot find any move. You have to guess.", "Information", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private static void autoplay_stopped_manually_warning(JFrame frame) {
-        JOptionPane.showMessageDialog(frame, "You stopped autoplay manually.", "Warning", JOptionPane.WARNING_MESSAGE);
+    private static void computation_stopped_manually_warning(JFrame frame) {
+        JOptionPane.showMessageDialog(frame, "You stopped computation manually.", "Warning", JOptionPane.WARNING_MESSAGE);
     }
 
     private static void screen_capture_failed_warning(JFrame frame) {
@@ -194,7 +194,26 @@ public class Main {
         return 0;
     }
 
-    private static void get_and_show_predictions(JFrame frame, boolean all, int width, int height, int layers_upper_limit, int time_upper_limit) {
+    private static void before_process_button(JButton[] buttons) {
+        for (JButton button : buttons) {
+            button.setEnabled(false);
+        }
+    }
+
+    private static void after_process_button(JFrame frame, JButton[] buttons) {
+        for (JButton button : buttons) {
+            button.setEnabled(true);
+        }
+        if (computation_stopped_manually) {
+            computation_stopped_manually_warning(frame);
+        }
+    }
+
+    static volatile boolean continue_computation;
+    static volatile boolean computation_stopped_manually;
+    static AutoCloseable register;
+
+    private static void get_and_show_predictions_iteration(JFrame frame, boolean all, int width, int height, int layers_upper_limit, int time_upper_limit) {
         ScreenData screen = capture_screen(frame);
         if (screen != null) {
             debug_captured_screen(screen);
@@ -203,7 +222,11 @@ public class Main {
             try {
                 state = minesweeperScanner.scan(screen, debug);
             } catch (Exception ex) {
-                scan_error_warning(frame);
+                if (ex instanceof IllegalMapException) {
+                    illegal_board_warning(frame);
+                } else {
+                    scan_error_warning(frame);
+                }
                 ex.printStackTrace();
                 return;
             }
@@ -227,16 +250,41 @@ public class Main {
                     BufferedImage scanned = ScreenCapture.create_image_from_array(scanned_rgb_array);
                     BufferedImage marked = ScreenCapture.create_image_from_array(marked_rgb_array);
                     makeFlipFrame(frame, scanned, marked);
-                } else {
+                } else if (!computation_stopped_manually) {
                     prediction_not_found_warning(frame);
                 }
             }
         }
     }
 
-    static volatile boolean continue_autoplay;
-    static volatile boolean autoplay_stopped_manually;
-    static AutoCloseable register;
+    private static void get_and_show_predictions_thread(JFrame frame, boolean all, int width, int height, int layers_upper_limit, int time_upper_limit) {
+        get_and_show_predictions_iteration(frame, all, width, height, layers_upper_limit, time_upper_limit);
+        continue_computation = false;
+    }
+
+    private static void get_and_show_predictions(JFrame frame, boolean all, int width, int height, int layers_upper_limit, int time_upper_limit, JButton[] buttons) {
+        before_process_button(buttons);
+        if (null == register) {
+            esc_key_cannot_register_warning(frame);
+            after_process_button(frame, buttons);
+        } else {
+            continue_computation = true;
+            computation_stopped_manually = false;
+            Thread workerThread = new Thread(() -> get_and_show_predictions_thread(frame, all, width, height, layers_upper_limit, time_upper_limit));
+            new Thread(() -> {
+                while (continue_computation) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+                workerThread.interrupt();
+                SwingUtilities.invokeLater(() -> after_process_button(frame, buttons));
+            }).start();
+            workerThread.start();
+        }
+    }
 
     private static boolean autoplay_iteration(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit) {
         ScreenData screen = capture_screen(frame);
@@ -247,7 +295,11 @@ public class Main {
             try {
                 state = minesweeperScanner.scan(screen, debug);
             } catch (Exception ex) {
-                scan_error_warning(frame);
+                if (ex instanceof IllegalMapException) {
+                    illegal_board_warning(frame);
+                } else {
+                    scan_error_warning(frame);
+                }
                 ex.printStackTrace();
                 return false;
             }
@@ -257,7 +309,7 @@ public class Main {
                     illegal_board_warning(frame);
                 } else if (!predictions.isEmpty()) {
                     return MinesweeperAutoplay.iteration(predictions, interval, minesweeperScanner, state);
-                } else if (!autoplay_stopped_manually) {
+                } else if (!computation_stopped_manually) {
                     prediction_not_found_warning(frame);
                 }
             }
@@ -267,49 +319,45 @@ public class Main {
 
     private static void prepare_autoplay(JButton[] buttons, JButton autoplay_button) {
         change_autoplay_button(autoplay_button);
-        for (JButton button : buttons) {
-            button.setEnabled(false);
-        }
+        before_process_button(buttons);
     }
 
     private static void after_autoplay(JFrame frame, JButton[] buttons, JButton autoplay_button) {
-        for (JButton button : buttons) {
-            button.setEnabled(true);
-        }
         initialize_autoplay_button(autoplay_button);
-        if (autoplay_stopped_manually) {
-            autoplay_stopped_manually_warning(frame);
+        after_process_button(frame, buttons);
+    }
+
+    private static void autoplay_thread(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit) {
+        while (continue_computation && !Thread.currentThread().isInterrupted()) {
+            if (!autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit)) {
+                continue_computation = false;
+                break;
+            }
         }
     }
 
     private static void autoplay(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
         prepare_autoplay(buttons, autoplay_button);
-        continue_autoplay = true;
-        autoplay_stopped_manually = false;
         if (null == register) {
             esc_key_cannot_register_warning(frame);
-            return;
+            after_autoplay(frame, buttons, autoplay_button);
+        } else {
+            continue_computation = true;
+            computation_stopped_manually = false;
+            Thread workerThread = new Thread(() -> autoplay_thread(frame, width, height, interval, layers_upper_limit, time_upper_limit));
+            new Thread(() -> {
+                while (continue_computation) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+                workerThread.interrupt();
+                SwingUtilities.invokeLater(() -> after_autoplay(frame, buttons, autoplay_button));
+            }).start();
+            workerThread.start();
         }
-        Thread workerThread = new Thread(() -> {
-            while (continue_autoplay && !Thread.currentThread().isInterrupted()) {
-                if (!autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit)) {
-                    continue_autoplay = false;
-                    break;
-                }
-            }
-        });
-        new Thread(() -> {
-            while (continue_autoplay) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
-            workerThread.interrupt();
-            SwingUtilities.invokeLater(() -> after_autoplay(frame, buttons, autoplay_button));
-        }).start();
-        workerThread.start();
     }
 
     public static void deleteRecursively(File file) {
@@ -333,9 +381,9 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         register = MinesweeperAutoplay.register_exit_key(() -> {
         }, () -> {
-            if (continue_autoplay) {
-                autoplay_stopped_manually = true;
-                continue_autoplay = false;
+            if (continue_computation) {
+                computation_stopped_manually = true;
+                continue_computation = false;
             }
         });
         try {
@@ -458,27 +506,9 @@ public class Main {
         JButton random_move_button = new JButton("<html><center>Show one possible move randomly</center></html>");
         random_move_button.setFont(smallFont);
         random_move_button.setMaximumSize(new Dimension(200, random_move_button.getPreferredSize().height));
-        random_move_button.addActionListener(e -> {
-            int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
-            int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
-            int width = get_positive_integer(frame, width_textField, "width");
-            int height = get_positive_integer(frame, height_textField, "height");
-            if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height) {
-                get_and_show_predictions(frame, false, width, height, layers_upper_limit, time_upper_limit);
-            }
-        });
         JButton all_moves_button = new JButton("<html><center>Show all possible moves</center></html>");
         all_moves_button.setFont(smallFont);
         all_moves_button.setMaximumSize(new Dimension(200, all_moves_button.getPreferredSize().height));
-        all_moves_button.addActionListener(e -> {
-            int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
-            int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
-            int width = get_positive_integer(frame, width_textField, "width");
-            int height = get_positive_integer(frame, height_textField, "height");
-            if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height) {
-                get_and_show_predictions(frame, true, width, height, layers_upper_limit, time_upper_limit);
-            }
-        });
         JPanel interval_inputPanel = new JPanel();
         JLabel interval_inputLabel = new JLabel("Interval: ");
         interval_inputLabel.setFont(smallFont);
@@ -495,6 +525,25 @@ public class Main {
         initialize_autoplay_button(autoplay_button);
         autoplay_button.setFont(smallFont);
         autoplay_button.setMaximumSize(new Dimension(200, autoplay_button.getPreferredSize().height));
+        JButton[] all_buttons = new JButton[]{random_move_button, all_moves_button, autoplay_button};
+        random_move_button.addActionListener(e -> {
+            int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
+            int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
+            int width = get_positive_integer(frame, width_textField, "width");
+            int height = get_positive_integer(frame, height_textField, "height");
+            if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height) {
+                get_and_show_predictions(frame, false, width, height, layers_upper_limit, time_upper_limit, all_buttons);
+            }
+        });
+        all_moves_button.addActionListener(e -> {
+            int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
+            int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
+            int width = get_positive_integer(frame, width_textField, "width");
+            int height = get_positive_integer(frame, height_textField, "height");
+            if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height) {
+                get_and_show_predictions(frame, true, width, height, layers_upper_limit, time_upper_limit, all_buttons);
+            }
+        });
         autoplay_button.addActionListener(e -> {
             int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
             int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
@@ -502,7 +551,7 @@ public class Main {
             int height = get_positive_integer(frame, height_textField, "height");
             int interval = get_milliseconds(frame, interval_textField, "interval");
             if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height && 0 != interval) {
-                autoplay(frame, width, height, interval, layers_upper_limit, time_upper_limit, new JButton[]{random_move_button, all_moves_button, autoplay_button}, autoplay_button);
+                autoplay(frame, width, height, interval, layers_upper_limit, time_upper_limit, all_buttons, autoplay_button);
             }
         });
         JLabel label_3 = new JLabel("(Press Esc to stop autoplay)");
