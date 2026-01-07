@@ -249,12 +249,8 @@ public class Main {
                 ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_layers_and_time_get_prediction(layers_upper_limit, time_upper_limit);
                 if (null != predictions && !predictions.isEmpty()) {
                     return MinesweeperAutoplay.iteration(predictions, interval, minesweeperScanner, state);
-                } else {
-                    if (autoplay_stopped_manually) {
-                        autoplay_stopped_manually_warning(frame);
-                    } else {
-                        prediction_not_found_warning(frame);
-                    }
+                } else if (!autoplay_stopped_manually) {
+                    prediction_not_found_warning(frame);
                 }
             }
         }
@@ -268,11 +264,14 @@ public class Main {
         }
     }
 
-    private static void after_autoplay(JButton[] buttons, JButton autoplay_button) {
+    private static void after_autoplay(JFrame frame, JButton[] buttons, JButton autoplay_button) {
         for (JButton button : buttons) {
             button.setEnabled(true);
         }
         initialize_autoplay_button(autoplay_button);
+        if (autoplay_stopped_manually) {
+            prediction_not_found_warning(frame);
+        }
     }
 
     private static void autoplay(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
@@ -300,7 +299,7 @@ public class Main {
                 }
             }
             workerThread.interrupt();
-            SwingUtilities.invokeLater(() -> after_autoplay(buttons, autoplay_button));
+            SwingUtilities.invokeLater(() -> after_autoplay(frame, buttons, autoplay_button));
         }).start();
         workerThread.start();
     }
