@@ -435,8 +435,8 @@ public class MinesweeperState {
                                 if (!visited[new_i][new_j] && is_unfinished_operand(map[new_i][new_j])) {
                                     all_points.add(new Pair<>(new_i, new_j));
                                     prediction_tag[new_i][new_j] = true;
-                                    visited[new_i][new_j] = true;
                                 }
+                                visited[new_i][new_j] = true;
                             }
                         }
                     }
