@@ -127,7 +127,7 @@ public class MinesweeperState {
         }
         int mines = 0;
         int blanks = 0;
-        for (int[] vector : neighborhood) {
+        for (int[] vector : unit_vectors) {
             int new_i = i + vector[0];
             int new_j = j + vector[1];
             if (new_i >= 0 && new_i < map.length && new_j >= 0 && new_j < map[0].length) {
