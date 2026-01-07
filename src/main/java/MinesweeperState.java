@@ -497,6 +497,18 @@ public class MinesweeperState {
         return predictions;
     }
 
+    public ArrayList<Pair<Pair<Integer, Integer>, Character>> limit_layers_and_time_get_prediction(int layers_upper_limit, int time_upper_limit) {
+        long start_time = System.currentTimeMillis();
+        ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = get_predictions(1, start_time + time_upper_limit);
+        if (null != predictions && predictions.isEmpty()) {
+            int layers = 2;
+            while (predictions.isEmpty() && layers <= layers_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
+                predictions = get_predictions(layers++, start_time + time_upper_limit);
+            }
+        }
+        return predictions;
+    }
+
     public static void main(String[] args) {
         char[][] maps = new char[30][16];
         for (int row = 0; row < 30; ++row) {
