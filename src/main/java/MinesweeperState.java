@@ -141,7 +141,7 @@ public class MinesweeperState {
             if (new_i >= 0 && new_i < map.length && new_j >= 0 && new_j < map[0].length) {
                 if (MINE_FLAG == map[new_i][new_j]) {
                     ++mines;
-                } else if (BLANK == map[new_i][new_j] || QUESTION_MARK == map[new_i][new_j]) {
+                } else if (is_unfinished_operand(map[new_i][new_j])) {
                     ++blanks;
                 }
             }
@@ -163,7 +163,7 @@ public class MinesweeperState {
         int blanks = 0;
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                if (BLANK == map[i][j] || QUESTION_MARK == map[i][j]) {
+                if (is_unfinished_operand(map[i][j])) {
                     ++blanks;
                 }
                 if (force_finished && is_unfinished_operand(map[i][j])) {
@@ -316,7 +316,7 @@ public class MinesweeperState {
         int blanks = 0;
         for (int i = 0; i < nrows; i++) {
             for (int j = 0; j < ncols; j++) {
-                if (BLANK == temp_map[i][j] || QUESTION_MARK == temp_map[i][j]) {
+                if (is_unfinished_operand(temp_map[i][j])) {
                     ++blanks;
                 }
                 if (force_finished && is_unfinished_operand(temp_map[i][j])) {
@@ -422,6 +422,9 @@ public class MinesweeperState {
         for (int layer = 0; layer < layers; ++layer) {
             for (int i = 0; i < nrows; ++i) {
                 for (int j = 0; j < ncols; ++j) {
+                    if (!is_unfinished_operand(map[i][j])) {
+                        visited[i][j] = true;
+                    }
                     if (is_number(map[i][j])) {
                         int min_i = Math.max(0, i - (layer + 1));
                         int max_i = Math.min(nrows - 1, i + (layer + 1));
@@ -429,7 +432,7 @@ public class MinesweeperState {
                         int max_j = Math.min(ncols - 1, j + (layer + 1));
                         for (int new_i = min_i; new_i <= max_i; ++new_i) {
                             for (int new_j = min_j; new_j <= max_j; ++new_j) {
-                                if (!visited[new_i][new_j] && (BLANK == map[new_i][new_j] || QUESTION_MARK == map[new_i][new_j])) {
+                                if (!visited[new_i][new_j] && is_unfinished_operand(map[new_i][new_j])) {
                                     all_points.add(new Pair<>(new_i, new_j));
                                     prediction_tag[new_i][new_j] = true;
                                     visited[new_i][new_j] = true;
@@ -456,7 +459,7 @@ public class MinesweeperState {
         temp_map = new char[nrows][ncols];
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < ncols; ++j) {
-                if (QUESTION_MARK == map[i][j]) {
+                if (is_unfinished_operand(map[i][j])) {
                     temp_map[i][j] = BLANK;
                 } else {
                     temp_map[i][j] = map[i][j];
