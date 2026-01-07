@@ -393,14 +393,16 @@ public class MinesweeperState {
     }
 
     private boolean search_unfinished(ArrayList<Pair<Integer, Integer>> target_points, int remaining_mines) {
-        try {
-            Thread.ofVirtual().start(() -> {
-                search(target_points, 0, remaining_mines);
-            }).join();
-            return force_stopped;
-        } catch (InterruptedException e) {
-            return true;
+        if (!force_stopped) {
+            try {
+                Thread.ofVirtual().start(() -> {
+                    search(target_points, 0, remaining_mines);
+                }).join();
+            } catch (InterruptedException e) {
+                force_stopped = true;
+            }
         }
+        return force_stopped;
     }
 
     private void initialize_get_predictions(int layers, long search_stop_before) {
