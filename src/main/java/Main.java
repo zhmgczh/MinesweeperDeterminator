@@ -228,6 +228,10 @@ public class Main {
         }
     }
 
+    static volatile boolean continue_autoplay;
+    static volatile boolean autoplay_stopped_manually;
+    static AutoCloseable register;
+
     private static boolean autoplay_iteration(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit) {
         ScreenData screen = capture_screen(frame);
         if (screen != null) {
@@ -246,16 +250,16 @@ public class Main {
                 if (null != predictions && !predictions.isEmpty()) {
                     return MinesweeperAutoplay.iteration(predictions, interval, minesweeperScanner, state);
                 } else {
-                    prediction_not_found_warning(frame);
+                    if (autoplay_stopped_manually) {
+                        autoplay_stopped_manually_warning(frame);
+                    } else {
+                        prediction_not_found_warning(frame);
+                    }
                 }
             }
         }
         return false;
     }
-
-    static volatile boolean continue_autoplay;
-    static volatile boolean autoplay_stopped_manually;
-    static AutoCloseable register;
 
     private static void prepare_autoplay(JButton[] buttons, JButton autoplay_button) {
         change_autoplay_button(autoplay_button);
@@ -264,14 +268,11 @@ public class Main {
         }
     }
 
-    private static void after_autoplay(JFrame frame, JButton[] buttons, JButton autoplay_button) {
+    private static void after_autoplay(JButton[] buttons, JButton autoplay_button) {
         for (JButton button : buttons) {
             button.setEnabled(true);
         }
         initialize_autoplay_button(autoplay_button);
-        if (autoplay_stopped_manually) {
-            autoplay_stopped_manually_warning(frame);
-        }
     }
 
     private static void autoplay(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
@@ -299,7 +300,7 @@ public class Main {
                 }
             }
             workerThread.interrupt();
-            SwingUtilities.invokeLater(() -> after_autoplay(frame, buttons, autoplay_button));
+            SwingUtilities.invokeLater(() -> after_autoplay(buttons, autoplay_button));
         }).start();
         workerThread.start();
     }
