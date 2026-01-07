@@ -270,7 +270,7 @@ public class Main {
         }
         initialize_autoplay_button(autoplay_button);
         if (autoplay_stopped_manually) {
-            prediction_not_found_warning(frame);
+            autoplay_stopped_manually_warning(frame);
         }
     }
 
