@@ -1,6 +1,12 @@
 import java.awt.image.BufferedImage;
 import java.util.*;
 
+class IllegalMapException extends IllegalArgumentException {
+    public IllegalMapException(String message) {
+        super(message);
+    }
+}
+
 public class MinesweeperState {
     static final char BLANK = '*';
     static final char QUESTION_MARK = '?';
