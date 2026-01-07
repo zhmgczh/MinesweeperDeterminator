@@ -481,7 +481,7 @@ public class MinesweeperState {
             }
             if (blocks.size() != 1 && !has_found_predictions()) {
                 reset_possibility_map();
-                if (force_stopped || search_unfinished(all_points, remaining_mines)) {
+                if (search_unfinished(all_points, remaining_mines)) {
                     return predictions;
                 }
             }
