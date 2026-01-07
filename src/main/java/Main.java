@@ -101,16 +101,6 @@ public class Main {
         return ScreenCapture.convert_image_to_screen(image);
     }
 
-    private static void set_font(Font font, JPanel time_inputPanel, JLabel time_inputLabel, JTextField time_textField) {
-        time_textField.setFont(font);
-        JLabel time_unitLabel = new JLabel("s");
-        time_unitLabel.setFont(font);
-        time_inputPanel.add(time_inputLabel);
-        time_inputPanel.add(time_textField);
-        time_inputPanel.add(time_unitLabel);
-        time_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, time_inputPanel.getPreferredSize().height));
-    }
-
     public static JFrame makeFlipFrame(JFrame frame, final BufferedImage img1, final BufferedImage img2) {
         frame.setVisible(false);
         final JFrame f = new JFrame();
@@ -369,7 +359,13 @@ public class Main {
         time_inputLabel.setFont(smallFont);
         JTextField time_textField = new JTextField(2);
         time_textField.setText("10");
-        set_font(smallFont, time_inputPanel, time_inputLabel, time_textField);
+        time_textField.setFont(smallFont);
+        JLabel time_unitLabel1 = new JLabel("s");
+        time_unitLabel1.setFont(smallFont);
+        time_inputPanel.add(time_inputLabel);
+        time_inputPanel.add(time_textField);
+        time_inputPanel.add(time_unitLabel1);
+        time_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, time_inputPanel.getPreferredSize().height));
         JPanel width_inputPanel = new JPanel();
         JLabel width_inputLabel = new JLabel("Width: ");
         width_inputLabel.setFont(smallFont);
@@ -480,7 +476,13 @@ public class Main {
         interval_inputLabel.setFont(smallFont);
         JTextField interval_textField = new JTextField(3);
         interval_textField.setText("0.1");
-        set_font(smallFont, interval_inputPanel, interval_inputLabel, interval_textField);
+        interval_textField.setFont(smallFont);
+        JLabel time_unitLabel = new JLabel("s");
+        time_unitLabel.setFont(smallFont);
+        interval_inputPanel.add(interval_inputLabel);
+        interval_inputPanel.add(interval_textField);
+        interval_inputPanel.add(time_unitLabel);
+        interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
         JButton autoplay_button = new JButton();
         initialize_autoplay_button(autoplay_button);
         autoplay_button.setFont(smallFont);
