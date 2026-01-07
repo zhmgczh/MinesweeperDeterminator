@@ -256,7 +256,7 @@ public class MinesweeperScanner {
         return integer;
     }
 
-    public MinesweeperState scan(ScreenData screen, boolean debug) throws IllegalArgumentException {
+    public MinesweeperState scan(ScreenData screen, boolean debug) throws IllegalMapException {
         assert screen != null;
         int panel_coordinates[] = find_panel_coordinates(screen);
         int remaining_mines_and_times_coordinates[] = find_remaining_mines_and_time_coordinates(screen, panel_coordinates);
@@ -268,11 +268,11 @@ public class MinesweeperScanner {
         return new MinesweeperState(time_passed, remaining_mines, map);
     }
 
-    public MinesweeperState scan(ScreenData screen) throws IllegalArgumentException {
+    public MinesweeperState scan(ScreenData screen) throws IllegalMapException {
         return scan(screen, false);
     }
 
-    public static void main(String[] args) throws IllegalArgumentException {
+    public static void main(String[] args) throws IllegalMapException {
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty.png");
         ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/almost_final.png");
