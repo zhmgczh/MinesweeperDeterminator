@@ -2,31 +2,32 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 
 public class MinesweeperState {
-    public static final char BLANK = '*';
-    public static final char QUESTION_MARK = '?';
-    public static final char MINE_FLAG = 'F';
-    public static final char MINE_EXPLODED = 'X';
-    public static final char MINE_UNFOUND = 'U';
-    public static final char MINE_WRONGLY_FLAGGED = 'W';
-    public static final char ZERO = '0';
-    public static final char ONE = '1';
-    public static final char TWO = '2';
-    public static final char THREE = '3';
-    public static final char FOUR = '4';
-    public static final char FIVE = '5';
-    public static final char SIX = '6';
-    public static final char SEVEN = '7';
-    public static final char EIGHT = '8';
+    static final char BLANK = '*';
+    static final char QUESTION_MARK = '?';
+    static final char MINE_FLAG = 'F';
+    static final char MINE_EXPLODED = 'X';
+    static final char MINE_UNFOUND = 'U';
+    static final char MINE_WRONGLY_FLAGGED = 'W';
+    static final char ZERO = '0';
+    static final char ONE = '1';
+    static final char TWO = '2';
+    static final char THREE = '3';
+    static final char FOUR = '4';
+    static final char FIVE = '5';
+    static final char SIX = '6';
+    static final char SEVEN = '7';
+    static final char EIGHT = '8';
     static final char[] unfinished_operands = {BLANK, QUESTION_MARK};
     static final char[] lost_operands = {MINE_EXPLODED, MINE_UNFOUND, MINE_WRONGLY_FLAGGED};
     static final char[] operands = {BLANK, QUESTION_MARK, MINE_FLAG, MINE_EXPLODED, MINE_UNFOUND, MINE_WRONGLY_FLAGGED, ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT};
     static final String[] image_names = {"blank", "question_mark", "mine_flag", "mine_exploded", "mine_unfound", "mine_wrongly_flagged", "mine_0", "mine_1", "mine_2", "mine_3", "mine_4", "mine_5", "mine_6", "mine_7", "mine_8"};
     static final String[] digit_names = {"digit_0", "digit_1", "digit_2", "digit_3", "digit_4", "digit_5", "digit_6", "digit_7", "digit_8", "digit_9"};
     static final int[][] neighborhood = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 0}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+    static final int[][] unit_vectors = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
     static int[][][][] images;
     static int[][][][] digits;
-    public int time_passed, remaining_mines, nrows, ncols;
-    public char[][] map;
+    private final int time_passed, remaining_mines, nrows, ncols;
+    private final char[][] map;
 
     static {
         load_images();
@@ -55,7 +56,7 @@ public class MinesweeperState {
         }
     }
 
-    public MinesweeperState(int time_passed, int remaining_mines, char map[][]) {
+    public MinesweeperState(int time_passed, int remaining_mines, char[][] map) {
         assert time_passed >= 0 && time_passed <= 999 && remaining_mines >= 0;
         assert null != map && map.length > 0 && null != map[0] && map[0].length > 0;
         assert check_map_valid(map, remaining_mines, false);
@@ -66,7 +67,7 @@ public class MinesweeperState {
         this.ncols = map[0].length;
     }
 
-    public boolean is_valid_operand(char c) {
+    public static boolean is_valid_operand(char c) {
         for (char operand : operands) {
             if (c == operand) {
                 return true;
@@ -75,7 +76,7 @@ public class MinesweeperState {
         return false;
     }
 
-    public boolean is_unfinished_operand(char c) {
+    public static boolean is_unfinished_operand(char c) {
         for (char operand : unfinished_operands) {
             if (c == operand) {
                 return true;
@@ -84,7 +85,7 @@ public class MinesweeperState {
         return false;
     }
 
-    public boolean is_lost_operand(char c) {
+    public static boolean is_lost_operand(char c) {
         for (char operand : lost_operands) {
             if (c == operand) {
                 return true;
@@ -111,16 +112,16 @@ public class MinesweeperState {
         return started ? (unfinished ? 'P' : 'W') : 'S';
     }
 
-    public boolean is_number(char c) {
+    public static boolean is_number(char c) {
         return c >= ZERO && c <= EIGHT;
     }
 
-    public int to_number(char c) {
+    public static int to_number(char c) {
         assert is_number(c);
         return c - '0';
     }
 
-    public boolean check_number_valid(char[][] map, int i, int j, boolean force_finished) {
+    public static boolean check_number_valid(char[][] map, int i, int j, boolean force_finished) {
         if (!is_number(map[i][j])) {
             return true;
         }
@@ -140,17 +141,14 @@ public class MinesweeperState {
         if (force_finished && mines != to_number(map[i][j])) {
             return false;
         }
-        if (mines > to_number(map[i][j]) || mines + blanks < to_number(map[i][j])) {
-            return false;
-        }
-        return true;
+        return mines <= to_number(map[i][j]) && mines + blanks >= to_number(map[i][j]);
     }
 
     public boolean check_number_valid(int i, int j, boolean force_finished) {
         return check_number_valid(map, i, j, force_finished);
     }
 
-    public boolean check_map_valid(char map[][], int remaining_mines, boolean force_finished) {
+    public static boolean check_map_valid(char[][] map, int remaining_mines, boolean force_finished) {
         if (force_finished && 0 != remaining_mines) {
             return false;
         }
@@ -172,6 +170,26 @@ public class MinesweeperState {
             }
         }
         return remaining_mines <= blanks;
+    }
+
+    public boolean check_map_valid(boolean force_finished) {
+        return check_map_valid(map, remaining_mines, force_finished);
+    }
+
+    public static ArrayList<Pair<Integer, Integer>> get_numbers_in_domain(char[][] map, int i, int j) {
+        ArrayList<Pair<Integer, Integer>> numbers = new ArrayList<>();
+        for (int[] unit_vector : unit_vectors) {
+            int new_i = i + unit_vector[0];
+            int new_j = j + unit_vector[1];
+            if (new_i >= 0 && new_i < map.length && new_j >= 0 && new_j < map[0].length && is_number(map[new_i][new_j])) {
+                numbers.add(new Pair<>(new_i, new_j));
+            }
+        }
+        return numbers;
+    }
+
+    public ArrayList<Pair<Integer, Integer>> get_numbers_in_domain(int i, int j) {
+        return get_numbers_in_domain(map, i, j);
     }
 
     public int get_nrows() {
@@ -202,16 +220,13 @@ public class MinesweeperState {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Time passed: ").append(time_passed).append(" Remaining mines: ").append(remaining_mines).append("\nWidth: ").append(nrows).append(" Height: ").append(ncols).append('\n');
-        sb.append(get_map_as_string(map));
-        return sb.toString();
+        return "Time passed: " + time_passed + " Remaining mines: " + remaining_mines + "\nWidth: " + nrows + " Height: " + ncols + '\n' + get_map_as_string(map);
     }
 
-    public int[][][] get_map_rgb_array(char[][] map) {
-        int[][][] rgb = new int[nrows * images[0].length][ncols * images[0][0].length][3];
-        for (int i = 0; i < nrows; ++i) {
-            for (int j = 0; j < ncols; ++j) {
+    public static int[][][] get_map_rgb_array(char[][] map) {
+        int[][][] rgb = new int[map.length * images[0].length][map[0].length * images[0][0].length][3];
+        for (int i = 0; i < map.length; ++i) {
+            for (int j = 0; j < map[0].length; ++j) {
                 for (int k = 0; k < operands.length; ++k) {
                     if (map[i][j] == operands[k]) {
                         int base_i = i * images[0].length;
@@ -231,7 +246,7 @@ public class MinesweeperState {
         return rgb;
     }
 
-    public int[][][] get_map_rgb_array(char[][] map, int resize) {
+    public static int[][][] get_map_rgb_array(char[][] map, int resize) {
         int[][][] rgb = get_map_rgb_array(map);
         return RGB.resize(rgb, rgb.length * resize, rgb[0].length * resize);
     }
@@ -267,12 +282,11 @@ public class MinesweeperState {
         return get_map_rgb_array(new_map, resize);
     }
 
-    private static final int[][] unit_vectors = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
-    private static char[][] temp_map;
-    private static HashMap<Pair<Integer, Integer>, HashSet<Character>> possibility_map;
-    private static ArrayList<Pair<Integer, Integer>> all_points;
-    private static long search_stop_before;
-    private static boolean force_stopped = false;
+    private char[][] temp_map;
+    private HashMap<Pair<Integer, Integer>, HashSet<Character>> possibility_map;
+    private ArrayList<Pair<Integer, Integer>> all_points;
+    private long search_stop_before;
+    private boolean force_stopped = false;
 
     private boolean check_position_valid(int i, int j) {
         for (int[] unit_vector : unit_vectors) {
@@ -338,21 +352,26 @@ public class MinesweeperState {
 
     private boolean[][] prediction_tag;
 
+    private ArrayList<Pair<Integer, Integer>> get_prediction_points_in_domain(int i, int j) {
+        ArrayList<Pair<Integer, Integer>> points = new ArrayList<>();
+        for (int[] unit_vector : unit_vectors) {
+            int new_i = i + unit_vector[0];
+            int new_j = j + unit_vector[1];
+            if (new_i >= 0 && new_i < nrows && new_j >= 0 && new_j < ncols && prediction_tag[new_i][new_j]) {
+                points.add(new Pair<>(new_i, new_j));
+            }
+        }
+        return points;
+    }
+
     private ArrayList<ArrayList<Pair<Integer, Integer>>> get_blocks() {
         UnionFindSet<Pair<Integer, Integer>> set = new UnionFindSet<>(new HashSet<>(all_points));
         for (Pair<Integer, Integer> point : all_points) {
-            if (prediction_tag[point.getFirst()][point.getSecond()]) {
-                for (int[] unit_vector : unit_vectors) {
-                    int new_x = point.getFirst() + unit_vector[0];
-                    int new_y = point.getSecond() + unit_vector[1];
-                    if (new_x >= 0 && new_x < nrows && new_y >= 0 && new_y < ncols && prediction_tag[new_x][new_y]) {
-                        set.union(point, new Pair<>(new_x, new_y));
-                    }
-                    new_x += unit_vector[0];
-                    new_y += unit_vector[1];
-                    if (new_x >= 0 && new_x < nrows && new_y >= 0 && new_y < ncols && prediction_tag[new_x][new_y]) {
-                        set.union(point, new Pair<>(new_x, new_y));
-                    }
+            ArrayList<Pair<Integer, Integer>> numbers_in_domain = get_numbers_in_domain(temp_map, point.getFirst(), point.getSecond());
+            for (Pair<Integer, Integer> number_point : numbers_in_domain) {
+                ArrayList<Pair<Integer, Integer>> prediction_points = get_prediction_points_in_domain(number_point.getFirst(), number_point.getSecond());
+                for (Pair<Integer, Integer> prediction_point : prediction_points) {
+                    set.union(point, prediction_point);
                 }
             }
         }
@@ -385,7 +404,7 @@ public class MinesweeperState {
     }
 
     public ArrayList<Pair<Pair<Integer, Integer>, Character>> get_predictions(int layers, long search_stop_before) {
-        MinesweeperState.search_stop_before = search_stop_before;
+        this.search_stop_before = search_stop_before;
         force_stopped = false;
         ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = new ArrayList<>();
         all_points = new ArrayList<>();
