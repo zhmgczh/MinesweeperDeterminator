@@ -403,12 +403,10 @@ public class MinesweeperState {
         }
     }
 
-    public ArrayList<Pair<Pair<Integer, Integer>, Character>> get_predictions(int layers, long search_stop_before) {
+    private void initialize_get_predictions(int layers, long search_stop_before) {
         this.search_stop_before = search_stop_before;
         force_stopped = false;
-        ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = new ArrayList<>();
         all_points = new ArrayList<>();
-        int[][] point_layer = new int[nrows][ncols];
         prediction_tag = new boolean[nrows][ncols];
         boolean[][] visited = new boolean[nrows][ncols];
         for (int layer = 0; layer < layers; ++layer) {
@@ -423,7 +421,6 @@ public class MinesweeperState {
                             if (new_x >= 0 && new_x < nrows && new_y >= 0 && new_y < ncols && !visited[new_x][new_y] && (BLANK == map[new_x][new_y] || QUESTION_MARK == map[new_x][new_y])) {
                                 all_points.add(new Pair<>(new_x, new_y));
                                 prediction_tag[new_x][new_y] = true;
-                                point_layer[new_x][new_y] = layer;
                                 visited[new_x][new_y] = true;
                             }
                         }
@@ -435,42 +432,57 @@ public class MinesweeperState {
         for (Pair<Integer, Integer> point : all_points) {
             possibility_map.put(point, new HashSet<>());
         }
+    }
+
+    private void reset_possibility_map() {
+        for (Pair<Integer, Integer> point : all_points) {
+            possibility_map.get(point).clear();
+        }
+    }
+
+    private void initialize_temp_map() {
+        temp_map = new char[nrows][ncols];
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < ncols; ++j) {
+                if (QUESTION_MARK == map[i][j]) {
+                    temp_map[i][j] = BLANK;
+                } else {
+                    temp_map[i][j] = map[i][j];
+                }
+            }
+        }
+    }
+
+    private boolean has_found_predictions() {
+        boolean found = false;
+        for (Pair<Integer, Integer> point : all_points) {
+            if (1 == possibility_map.get(point).size()) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+    public ArrayList<Pair<Pair<Integer, Integer>, Character>> get_predictions(int layers, long search_stop_before) {
+        initialize_get_predictions(layers, search_stop_before);
+        ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = new ArrayList<>();
         if (0 == remaining_mines) {
             for (Pair<Integer, Integer> point : all_points) {
                 possibility_map.get(point).add(ZERO);
             }
         } else {
-            temp_map = new char[nrows][ncols];
-            for (int i = 0; i < nrows; ++i) {
-                for (int j = 0; j < ncols; ++j) {
-                    if (QUESTION_MARK == map[i][j]) {
-                        temp_map[i][j] = BLANK;
-                    } else {
-                        temp_map[i][j] = map[i][j];
-                    }
-                }
-            }
+            initialize_temp_map();
             ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
-                if (force_stopped || search_unfinished(block, remaining_mines)) {
+                if (search_unfinished(block, remaining_mines)) {
                     return predictions;
                 }
             }
-            if (blocks.size() != 1) {
-                boolean found = false;
-                for (Pair<Integer, Integer> point : all_points) {
-                    if (1 == possibility_map.get(point).size()) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    for (Pair<Integer, Integer> point : all_points) {
-                        possibility_map.get(point).clear();
-                    }
-                    if (force_stopped || search_unfinished(all_points, remaining_mines)) {
-                        return predictions;
-                    }
+            if (blocks.size() != 1 && !has_found_predictions()) {
+                reset_possibility_map();
+                if (force_stopped || search_unfinished(all_points, remaining_mines)) {
+                    return predictions;
                 }
             }
         }
@@ -482,7 +494,6 @@ public class MinesweeperState {
                 predictions.add(new Pair<>(point, (Character) possibility_set.toArray()[0]));
             }
         }
-        predictions.sort(Comparator.comparingInt(o -> point_layer[o.getFirst().getFirst()][o.getFirst().getSecond()]));
         return predictions;
     }
 
