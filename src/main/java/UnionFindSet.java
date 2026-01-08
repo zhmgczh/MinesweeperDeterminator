@@ -7,20 +7,20 @@ public class UnionFindSet<T> {
     private int count;
     private final int[] parent;
     private final int[] rank;
-    private final ArrayList<T> objects;
+    private final ArrayList<T> elements;
     private final HashMap<T, Integer> map;
 
-    public UnionFindSet(final HashSet<T> objects) {
-        if (null == objects) {
-            throw new IllegalArgumentException("Objects cannot be null");
+    public UnionFindSet(final HashSet<T> elements) {
+        if (null == elements) {
+            throw new IllegalArgumentException("Elements cannot be null.");
         }
-        count = objects.size();
+        count = elements.size();
         parent = new int[count];
         rank = new int[count];
-        this.objects = new ArrayList<>(objects);
+        this.elements = new ArrayList<>(elements);
         map = new HashMap<>((int) (count / 0.75f) + 1);
         for (int i = 0; i < count; ++i) {
-            map.put(this.objects.get(i), i);
+            map.put(this.elements.get(i), i);
             parent[i] = i;
         }
     }
@@ -46,7 +46,7 @@ public class UnionFindSet<T> {
         if (!map.containsKey(x)) {
             throw new NoSuchElementException("Element " + x + " not found");
         }
-        return objects.get(find(map.get(x)));
+        return elements.get(find(map.get(x)));
     }
 
     private void union(final int x, final int y) {

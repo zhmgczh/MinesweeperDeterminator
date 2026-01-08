@@ -373,29 +373,32 @@ public class MinesweeperState {
     }
 
     private ArrayList<ArrayList<Pair<Integer, Integer>>> get_blocks() {
-        UnionFindSet<Pair<Integer, Integer>> set = new UnionFindSet<>(new HashSet<>(all_points));
+        final HashSet<Pair<Integer, Integer>> all_points_hashset = new HashSet<>(all_points);
+        UnionFindSet<Pair<Integer, Integer>> set = new UnionFindSet<>(all_points_hashset);
+        Graph<Pair<Integer, Integer>> graph = new Graph<>(all_points_hashset);
         for (Pair<Integer, Integer> point : all_points) {
             ArrayList<Pair<Integer, Integer>> numbers_in_domain = get_numbers_in_domain(temp_map, point.getFirst(), point.getSecond());
             for (Pair<Integer, Integer> number_point : numbers_in_domain) {
                 ArrayList<Pair<Integer, Integer>> prediction_points = get_prediction_points_in_domain(number_point.getFirst(), number_point.getSecond());
                 for (Pair<Integer, Integer> prediction_point : prediction_points) {
                     set.union(point, prediction_point);
+                    graph.add_edge(point, prediction_point, 0);
+                    graph.add_edge(prediction_point, point, 0);
                 }
             }
         }
-        HashMap<Pair<Integer, Integer>, ArrayList<Pair<Integer, Integer>>> block_map = new HashMap<>();
+        ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = new ArrayList<>();
+        HashSet<Pair<Integer, Integer>> visited = new HashSet<>();
         for (Pair<Integer, Integer> point : all_points) {
             Pair<Integer, Integer> root = set.find(point);
-            if (!block_map.containsKey(root)) {
-                block_map.put(root, new ArrayList<>());
+            if (!visited.contains(root)) {
+                blocks.add(graph.get_bfs_order(root));
+                visited.add(root);
             }
-            block_map.get(root).add(point);
         }
-        ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = new ArrayList<>();
         all_points.clear();
-        for (Pair<Integer, Integer> root : block_map.keySet()) {
-            blocks.add(block_map.get(root));
-            all_points.addAll(block_map.get(root));
+        for (ArrayList<Pair<Integer, Integer>> block : blocks) {
+            all_points.addAll(block);
         }
         return blocks;
     }
