@@ -286,11 +286,10 @@ public class Main {
         }
     }
 
-    private static boolean autoplay_iteration(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit) {
+    private static boolean autoplay_iteration(MinesweeperScanner minesweeperScanner, JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit) {
         ScreenData screen = capture_screen(frame);
         if (screen != null) {
             debug_captured_screen(screen);
-            MinesweeperScanner minesweeperScanner = new MinesweeperScanner(width, height);
             MinesweeperState state;
             try {
                 state = minesweeperScanner.scan(screen, debug);
@@ -328,8 +327,9 @@ public class Main {
     }
 
     private static void autoplay_thread(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit) {
+        MinesweeperScanner minesweeperScanner = new MinesweeperScanner(width, height);
         while (continue_computation && !Thread.currentThread().isInterrupted()) {
-            if (!autoplay_iteration(frame, width, height, interval, layers_upper_limit, time_upper_limit)) {
+            if (!autoplay_iteration(minesweeperScanner, frame, width, height, interval, layers_upper_limit, time_upper_limit)) {
                 continue_computation = false;
                 break;
             }

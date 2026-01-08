@@ -5,15 +5,17 @@ public class MinesweeperScanner {
     public static final int[][] panel_background = {{189, 189, 189}};
     public static final int[][] digits_boards_background = {{0, 0, 0}};
     public static final int[][] board_border = {{131, 131, 131}, {255, 255, 255}};
-    int[] board_coordinates;
-    int[] grid_size;
+    private int[] panel_coordinates;
+    private int[] remaining_mines_and_times_coordinates;
+    private int[] board_coordinates;
+    private final int[] grid_size;
 
     public MinesweeperScanner(int width, int height) {
         assert width > 0 && height > 0;
         grid_size = new int[]{width, height};
     }
 
-    public MinesweeperScanner(int grid_size[]) {
+    public MinesweeperScanner(int[] grid_size) {
         assert grid_size != null && grid_size.length == 2 && grid_size[0] > 0 && grid_size[1] > 0;
         this.grid_size = grid_size;
     }
@@ -50,13 +52,13 @@ public class MinesweeperScanner {
         int max_area_1 = 0, max_area_2 = 0;
         int width_l_1 = panel_coordinates[0], width_r_1 = panel_coordinates[1], height_l_1 = panel_coordinates[2], height_r_1 = panel_coordinates[3];
         int width_l_2 = panel_coordinates[0], width_r_2 = panel_coordinates[1], height_l_2 = panel_coordinates[2], height_r_2 = panel_coordinates[3];
-        for (int i = 0; i < blocks.size(); ++i) {
+        for (ArrayList<int[]> block : blocks) {
             int w_l = Integer.MAX_VALUE, w_r = 0, h_l = Integer.MAX_VALUE, h_r = 0;
-            for (int j = 0; j < blocks.get(i).size(); ++j) {
-                w_l = Math.min(w_l, blocks.get(i).get(j)[0]);
-                w_r = Math.max(w_r, blocks.get(i).get(j)[0] + 1);
-                h_l = Math.min(h_l, blocks.get(i).get(j)[1]);
-                h_r = Math.max(h_r, blocks.get(i).get(j)[1] + 1);
+            for (int j = 0; j < block.size(); ++j) {
+                w_l = Math.min(w_l, block.get(j)[0]);
+                w_r = Math.max(w_r, block.get(j)[0] + 1);
+                h_l = Math.min(h_l, block.get(j)[1]);
+                h_r = Math.max(h_r, block.get(j)[1] + 1);
             }
             int block_area = (w_r - w_l) * (h_r - h_l);
             if (max_area_2 < block_area) {
@@ -83,18 +85,18 @@ public class MinesweeperScanner {
         return new int[]{width_l_1, width_r_1, height_l_1, height_r_1, width_l_2, width_r_2, height_l_2, height_r_2};
     }
 
-    public static int[] find_board_coordinates(ScreenData screen, int panel_coordinates[]) {
+    public static int[] find_board_coordinates(ScreenData screen, int[] panel_coordinates) {
         assert screen != null;
         ArrayList<ArrayList<int[]>> blocks = RGB.find_similar_color_blocks(screen.rgb_array, panel_coordinates[0], panel_coordinates[1], panel_coordinates[2], panel_coordinates[3], board_border, 50);
         int max_area = 0;
         int width_l = 0, width_r = screen.width, height_l = 0, height_r = screen.height;
-        for (int i = 0; i < blocks.size(); ++i) {
+        for (ArrayList<int[]> block : blocks) {
             int w_l = Integer.MAX_VALUE, w_r = 0, h_l = Integer.MAX_VALUE, h_r = 0;
-            for (int j = 0; j < blocks.get(i).size(); ++j) {
-                w_l = Math.min(w_l, blocks.get(i).get(j)[0]);
-                w_r = Math.max(w_r, blocks.get(i).get(j)[0] + 1);
-                h_l = Math.min(h_l, blocks.get(i).get(j)[1]);
-                h_r = Math.max(h_r, blocks.get(i).get(j)[1] + 1);
+            for (int j = 0; j < block.size(); ++j) {
+                w_l = Math.min(w_l, block.get(j)[0]);
+                w_r = Math.max(w_r, block.get(j)[0] + 1);
+                h_l = Math.min(h_l, block.get(j)[1]);
+                h_r = Math.max(h_r, block.get(j)[1] + 1);
             }
             int block_area = (w_r - w_l) * (h_r - h_l);
             if (block_area == (panel_coordinates[1] - panel_coordinates[0]) * (panel_coordinates[3] - panel_coordinates[2])) {
@@ -108,9 +110,9 @@ public class MinesweeperScanner {
                 max_area = block_area;
             }
         }
-        boolean map[][] = new boolean[width_r - width_l + 1][height_r - height_l + 1];
-        for (int i = 0; i < map.length; ++i) {
-            Arrays.fill(map[i], true);
+        boolean[][] map = new boolean[width_r - width_l + 1][height_r - height_l + 1];
+        for (boolean[] booleans : map) {
+            Arrays.fill(booleans, true);
         }
         for (int i = 0; i < map.length; ++i) {
             for (int j = 0; j < map[0].length; ++j) {
@@ -119,7 +121,7 @@ public class MinesweeperScanner {
                 }
             }
         }
-        int max_side_lengths[][] = find_max_side_lengths(map, 0, 2, 0, 2);
+        int[][] max_side_lengths = find_max_side_lengths(map, 0, 2, 0, 2);
         width_l += max_side_lengths[1][1];
         width_r -= max_side_lengths[1][1];
         height_l += max_side_lengths[1][1];
@@ -127,7 +129,7 @@ public class MinesweeperScanner {
         return new int[]{width_l, width_r, height_l, height_r};
     }
 
-    public static boolean side_length_augmentable(boolean map[][], int i, int j, int side_length) {
+    public static boolean side_length_augmentable(boolean[][] map, int i, int j, int side_length) {
         if (i + side_length > map.length || j + side_length > map[0].length) {
             return false;
         }
@@ -144,13 +146,13 @@ public class MinesweeperScanner {
         return true;
     }
 
-    public static int[][] find_max_side_lengths(boolean map[][], int start_i, int end_i, int start_j, int end_j) {
+    public static int[][] find_max_side_lengths(boolean[][] map, int start_i, int end_i, int start_j, int end_j) {
         assert map != null && map.length > 0 && map[0] != null && map[0].length > 0;
         assert start_i >= 0 && start_i < map.length;
         assert end_i >= start_i && end_i <= map.length;
         assert start_j >= 0 && start_j < map[0].length;
         assert end_j >= start_j && end_j <= map[0].length;
-        int max_side_lengths[][] = new int[map.length][map[0].length];
+        int[][] max_side_lengths = new int[map.length][map[0].length];
         for (int i = start_i; i < end_i; ++i) {
             for (int j = start_j; j < end_j; ++j) {
                 if (!map[i][j]) {
@@ -206,7 +208,7 @@ public class MinesweeperScanner {
     public char[][] get_map(ScreenData screen, int board_coordinates[], boolean debug) {
         assert screen != null && MinesweeperState.images != null;
         assert 4 == board_coordinates.length;
-        int board_rgb_array[][][] = extract_picture_slice(screen.rgb_array, board_coordinates[0], board_coordinates[1], board_coordinates[2], board_coordinates[3]);
+        int[][][] board_rgb_array = extract_picture_slice(screen.rgb_array, board_coordinates[0], board_coordinates[1], board_coordinates[2], board_coordinates[3]);
         if (debug) {
             ScreenCapture.save_array_to_file(board_rgb_array, "Debug/captured_board.png", "png");
         }
@@ -230,10 +232,10 @@ public class MinesweeperScanner {
 
     public static int[] get_digits(ScreenData screen, int width_l, int width_r, int height_l, int height_r, int number_of_digits) {
         assert MinesweeperState.digits != null && screen != null;
-        int digits[] = new int[3];
+        int[] digits = new int[3];
         int side_length = (width_r - width_l) / number_of_digits;
         for (int i = 0; i < number_of_digits; ++i) {
-            int slice[][][] = extract_picture_slice(screen.rgb_array, width_l + i * side_length, width_l + (i + 1) * side_length, height_l, height_r);
+            int[][][] slice = extract_picture_slice(screen.rgb_array, width_l + i * side_length, width_l + (i + 1) * side_length, height_l, height_r);
             double min_distance = Double.MAX_VALUE;
             for (int j = 0; j < MinesweeperState.digits.length; ++j) {
                 double distance = RGB.picture_average_distance(slice, MinesweeperState.digits[j]);
@@ -258,13 +260,18 @@ public class MinesweeperScanner {
 
     public MinesweeperState scan(ScreenData screen, boolean debug) throws IllegalMapException {
         assert screen != null;
-        int panel_coordinates[] = find_panel_coordinates(screen);
-        int remaining_mines_and_times_coordinates[] = find_remaining_mines_and_time_coordinates(screen, panel_coordinates);
+        if (null == panel_coordinates) {
+            panel_coordinates = find_panel_coordinates(screen);
+        }
+        if (null == remaining_mines_and_times_coordinates) {
+            remaining_mines_and_times_coordinates = find_remaining_mines_and_time_coordinates(screen, panel_coordinates);
+        }
         int remaining_mines = convert_digits_to_integer(get_digits(screen, remaining_mines_and_times_coordinates[0], remaining_mines_and_times_coordinates[1], remaining_mines_and_times_coordinates[2], remaining_mines_and_times_coordinates[3], 3));
         int time_passed = convert_digits_to_integer(get_digits(screen, remaining_mines_and_times_coordinates[4], remaining_mines_and_times_coordinates[5], remaining_mines_and_times_coordinates[6], remaining_mines_and_times_coordinates[7], 3));
-        int board_coordinates[] = find_board_coordinates(screen, panel_coordinates);
-        this.board_coordinates = board_coordinates;
-        char map[][] = get_map(screen, board_coordinates, debug);
+        if (null == board_coordinates) {
+            board_coordinates = find_board_coordinates(screen, panel_coordinates);
+        }
+        char[][] map = get_map(screen, board_coordinates, debug);
         return new MinesweeperState(time_passed, remaining_mines, map);
     }
 
