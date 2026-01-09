@@ -263,6 +263,10 @@ public class MinesweeperState {
         return get_map_rgb_array(map, resize);
     }
 
+    public int[][][] get_map_rgb_array() {
+        return get_map_rgb_array(map);
+    }
+
     public int[][][] get_marked_rgb_array(Pair<Pair<Integer, Integer>, Character> mark, int resize) {
         char[][] new_map = new char[nrows][ncols];
         for (int i = 0; i < nrows; ++i) {
@@ -277,6 +281,20 @@ public class MinesweeperState {
         return get_map_rgb_array(new_map, resize);
     }
 
+    public int[][][] get_marked_rgb_array(Pair<Pair<Integer, Integer>, Character> mark) {
+        char[][] new_map = new char[nrows][ncols];
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < ncols; ++j) {
+                if (i == mark.getFirst().getFirst() && j == mark.getFirst().getSecond()) {
+                    new_map[i][j] = mark.getSecond();
+                } else {
+                    new_map[i][j] = map[i][j];
+                }
+            }
+        }
+        return get_map_rgb_array(new_map);
+    }
+
     public int[][][] get_marked_rgb_array(ArrayList<Pair<Pair<Integer, Integer>, Character>> marks, int resize) {
         char[][] new_map = new char[nrows][ncols];
         for (int i = 0; i < nrows; ++i) {
@@ -288,6 +306,19 @@ public class MinesweeperState {
             new_map[mark.getFirst().getFirst()][mark.getFirst().getSecond()] = mark.getSecond();
         }
         return get_map_rgb_array(new_map, resize);
+    }
+
+    public int[][][] get_marked_rgb_array(ArrayList<Pair<Pair<Integer, Integer>, Character>> marks) {
+        char[][] new_map = new char[nrows][ncols];
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < ncols; ++j) {
+                new_map[i][j] = map[i][j];
+            }
+        }
+        for (Pair<Pair<Integer, Integer>, Character> mark : marks) {
+            new_map[mark.getFirst().getFirst()][mark.getFirst().getSecond()] = mark.getSecond();
+        }
+        return get_map_rgb_array(new_map);
     }
 
     private char[][] temp_map;

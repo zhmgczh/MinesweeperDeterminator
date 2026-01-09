@@ -230,7 +230,7 @@ public class Main {
                 ex.printStackTrace();
                 return;
             }
-            int[][][] scanned_rgb_array = state.get_map_rgb_array(2);
+            int[][][] scanned_rgb_array = state.get_map_rgb_array();
             debug_scanned_board(state, scanned_rgb_array);
             if (check_status(state, frame)) {
                 ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_layers_and_time_get_prediction(layers_upper_limit, time_upper_limit);
@@ -239,12 +239,12 @@ public class Main {
                     illegal_board_warning(frame);
                 } else if (!predictions.isEmpty()) {
                     if (all) {
-                        marked_rgb_array = state.get_marked_rgb_array(predictions, 2);
+                        marked_rgb_array = state.get_marked_rgb_array(predictions);
                         debug_all_predictions(predictions, state, marked_rgb_array);
                     } else {
                         Random random = new Random();
                         int random_index = random.nextInt(predictions.size());
-                        marked_rgb_array = state.get_marked_rgb_array(predictions.get(random_index), 2);
+                        marked_rgb_array = state.get_marked_rgb_array(predictions.get(random_index));
                         debug_random_prediction(marked_rgb_array, random_index);
                     }
                     BufferedImage scanned = ScreenCapture.create_image_from_array(scanned_rgb_array);
