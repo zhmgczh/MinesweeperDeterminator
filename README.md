@@ -40,7 +40,7 @@ Currently, it only focuses on the fitness of the website [https://minesweeper-pr
 ## Future Improvements
 
 - Add support for different Minesweeper themes and resolutions.
-- Improve OCR accuracy for mine counter detection.
+- Improve OCR accuracy for board state and mine counter detection.
 
 ---
 
