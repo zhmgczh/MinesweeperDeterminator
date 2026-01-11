@@ -164,10 +164,10 @@ public class MinesweeperState {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 if (is_unfinished_operand(map[i][j])) {
+                    if (force_finished) {
+                        return false;
+                    }
                     ++blanks;
-                }
-                if (force_finished && is_unfinished_operand(map[i][j])) {
-                    return false;
                 }
                 if (!is_valid_operand(map[i][j])) {
                     return false;
@@ -348,10 +348,10 @@ public class MinesweeperState {
         for (int i = 0; i < nrows; i++) {
             for (int j = 0; j < ncols; j++) {
                 if (is_unfinished_operand(temp_map[i][j])) {
+                    if (force_finished) {
+                        return false;
+                    }
                     ++blanks;
-                }
-                if (force_finished && is_unfinished_operand(temp_map[i][j])) {
-                    return false;
                 }
             }
         }
