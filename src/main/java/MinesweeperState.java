@@ -341,13 +341,27 @@ public class MinesweeperState {
         return true;
     }
 
-    private boolean check_temp_map_positions_valid(ArrayList<Pair<Integer, Integer>> all_points, boolean force_finished) {
+    private boolean check_temp_map_positions_valid(ArrayList<Pair<Integer, Integer>> all_points, int remaining_mines, boolean force_finished) {
+        if (force_finished && 0 != remaining_mines) {
+            return false;
+        }
         for (Pair<Integer, Integer> point : all_points) {
             if (!check_temp_map_position_valid(point.getFirst(), point.getSecond(), force_finished)) {
                 return false;
             }
         }
-        return true;
+        int blanks = 0;
+        for (char[] chars : temp_map) {
+            for (char state : chars) {
+                if (is_unfinished_operand(state)) {
+                    if (force_finished) {
+                        return false;
+                    }
+                    ++blanks;
+                }
+            }
+        }
+        return 0 <= remaining_mines && remaining_mines <= blanks;
     }
 
     private void quick_set_and_check_valid(int point_index, ArrayList<Pair<Integer, Integer>> all_points, char state) {
@@ -373,7 +387,7 @@ public class MinesweeperState {
             return;
         }
         if (point_index == all_points.size()) {
-            if (check_temp_map_positions_valid(all_points, force_finished)) {
+            if (check_temp_map_positions_valid(all_points, remaining_mines, force_finished)) {
                 for (Pair<Integer, Integer> point : all_points) {
                     possibility_map.get(point).add(temp_map[point.getFirst()][point.getSecond()]);
                 }
