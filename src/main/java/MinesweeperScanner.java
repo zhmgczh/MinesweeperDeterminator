@@ -281,8 +281,8 @@ public class MinesweeperScanner {
 
     public static void main(String[] args) throws IllegalMapException {
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty.png");
-        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process.png");
-//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/almost_final.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process.png");
+        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/almost_final.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final.png");
         ScreenCapture.save_screen_to_file(screen, "Debug/captured_screen.png", "png");
         MinesweeperScanner minesweeperScanner = new MinesweeperScanner(30, 16);
