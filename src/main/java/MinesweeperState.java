@@ -448,12 +448,6 @@ public class MinesweeperState {
         return force_stopped;
     }
 
-    private void reset_possibility_map() {
-        for (Pair<Integer, Integer> point : all_points) {
-            possibility_map.get(point).clear();
-        }
-    }
-
     private void initialize_temp_map() {
         temp_map = new char[nrows][ncols];
         for (int i = 0; i < nrows; ++i) {
@@ -511,9 +505,9 @@ public class MinesweeperState {
         }
     }
 
-    private void initialize_possibility_map() {
+    private void initialize_possibility_map(ArrayList<Pair<Integer, Integer>> target_points) {
         possibility_map = new HashMap<>();
-        for (Pair<Integer, Integer> point : all_points) {
+        for (Pair<Integer, Integer> point : target_points) {
             possibility_map.put(point, new HashSet<>());
         }
     }
@@ -530,8 +524,9 @@ public class MinesweeperState {
                 predictions.add(new Pair<>(point, MINE_FLAG));
             }
         } else {
+            ArrayList<Pair<Integer, Integer>> target_points = all_points;
             initialize_temp_map();
-            initialize_possibility_map();
+            initialize_possibility_map(all_points);
             ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
                 if (search_unfinished(block, remaining_mines)) {
@@ -539,12 +534,20 @@ public class MinesweeperState {
                 }
             }
             if (blocks.size() != 1 && !has_found_predictions()) {
-                reset_possibility_map();
-                if (search_unfinished(all_points, remaining_mines)) {
+                target_points = all_points;
+                initialize_possibility_map(target_points);
+                if (search_unfinished(target_points, remaining_mines)) {
                     return predictions;
                 }
             }
-            for (Pair<Integer, Integer> point : all_points) {
+            if (!has_found_predictions()) {
+                target_points = all_blanks;
+                initialize_possibility_map(target_points);
+                if (search_unfinished(target_points, remaining_mines)) {
+                    return predictions;
+                }
+            }
+            for (Pair<Integer, Integer> point : target_points) {
                 HashSet<Character> possibility_set = possibility_map.get(point);
                 if (possibility_set.isEmpty()) {
                     return null;
