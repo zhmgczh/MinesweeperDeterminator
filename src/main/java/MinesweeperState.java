@@ -382,9 +382,9 @@ public class MinesweeperState {
             quick_set_and_check_valid(point_index, all_points, ZERO);
             search(all_points, all_points.size(), 0, force_finished);
             quick_reset(all_points, point_index);
-        } else if (force_finished && all_points.size() - point_index == remaining_mines) {
+        } else if (all_blanks.size() - point_index == remaining_mines) {
             quick_set_and_check_valid(point_index, all_points, MINE_FLAG);
-            search(all_points, all_points.size(), 0, true);
+            search(all_points, all_points.size(), 0, force_finished);
             quick_reset(all_points, point_index);
         } else {
             int x = all_points.get(point_index).getFirst();
