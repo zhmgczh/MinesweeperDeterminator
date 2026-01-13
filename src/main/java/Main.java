@@ -213,7 +213,7 @@ public class Main {
     static volatile boolean computation_stopped_manually;
     static AutoCloseable register;
 
-    private static void get_and_show_predictions_iteration(JFrame frame, boolean all, int width, int height, int layers_upper_limit, int time_upper_limit) {
+    private static void get_and_show_predictions_iteration(JFrame frame, boolean all, int width, int height, int time_upper_limit) {
         ScreenData screen = capture_screen(frame);
         if (screen != null) {
             debug_captured_screen(screen);
@@ -233,7 +233,7 @@ public class Main {
             int[][][] scanned_rgb_array = state.get_map_rgb_array();
             debug_scanned_board(state, scanned_rgb_array);
             if (check_status(state, frame)) {
-                ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_layers_and_time_get_prediction(layers_upper_limit, time_upper_limit);
+                ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_layers_and_time_get_prediction(time_upper_limit);
                 int[][][] marked_rgb_array;
                 if (null == predictions) {
                     illegal_board_warning(frame);
@@ -257,12 +257,12 @@ public class Main {
         }
     }
 
-    private static void get_and_show_predictions_thread(JFrame frame, boolean all, int width, int height, int layers_upper_limit, int time_upper_limit) {
-        get_and_show_predictions_iteration(frame, all, width, height, layers_upper_limit, time_upper_limit);
+    private static void get_and_show_predictions_thread(JFrame frame, boolean all, int width, int height, int time_upper_limit) {
+        get_and_show_predictions_iteration(frame, all, width, height, time_upper_limit);
         continue_computation = false;
     }
 
-    private static void get_and_show_predictions(JFrame frame, boolean all, int width, int height, int layers_upper_limit, int time_upper_limit, JButton[] buttons) {
+    private static void get_and_show_predictions(JFrame frame, boolean all, int width, int height, int time_upper_limit, JButton[] buttons) {
         before_process_button(buttons);
         if (null == register) {
             esc_key_cannot_register_warning(frame);
@@ -270,7 +270,7 @@ public class Main {
         } else {
             continue_computation = true;
             computation_stopped_manually = false;
-            Thread workerThread = new Thread(() -> get_and_show_predictions_thread(frame, all, width, height, layers_upper_limit, time_upper_limit));
+            Thread workerThread = new Thread(() -> get_and_show_predictions_thread(frame, all, width, height, time_upper_limit));
             new Thread(() -> {
                 while (continue_computation) {
                     try {
@@ -286,7 +286,7 @@ public class Main {
         }
     }
 
-    private static boolean autoplay_iteration(MinesweeperScanner minesweeperScanner, JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit) {
+    private static boolean autoplay_iteration(MinesweeperScanner minesweeperScanner, JFrame frame, int interval, int time_upper_limit) {
         ScreenData screen = capture_screen(frame);
         if (screen != null) {
             debug_captured_screen(screen);
@@ -303,7 +303,7 @@ public class Main {
                 return false;
             }
             if (check_status(state, frame)) {
-                ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_layers_and_time_get_prediction(layers_upper_limit, time_upper_limit);
+                ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_layers_and_time_get_prediction(time_upper_limit);
                 if (null == predictions) {
                     illegal_board_warning(frame);
                 } else if (!predictions.isEmpty()) {
@@ -326,17 +326,17 @@ public class Main {
         after_process_button(frame, buttons);
     }
 
-    private static void autoplay_thread(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit) {
+    private static void autoplay_thread(JFrame frame, int width, int height, int interval, int time_upper_limit) {
         MinesweeperScanner minesweeperScanner = new MinesweeperScanner(width, height);
         while (continue_computation && !Thread.currentThread().isInterrupted()) {
-            if (!autoplay_iteration(minesweeperScanner, frame, width, height, interval, layers_upper_limit, time_upper_limit)) {
+            if (!autoplay_iteration(minesweeperScanner, frame, interval, time_upper_limit)) {
                 continue_computation = false;
                 break;
             }
         }
     }
 
-    private static void autoplay(JFrame frame, int width, int height, int interval, int layers_upper_limit, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
+    private static void autoplay(JFrame frame, int width, int height, int interval, int time_upper_limit, JButton[] buttons, JButton autoplay_button) {
         prepare_autoplay(buttons, autoplay_button);
         if (null == register) {
             esc_key_cannot_register_warning(frame);
@@ -344,7 +344,7 @@ public class Main {
         } else {
             continue_computation = true;
             computation_stopped_manually = false;
-            Thread workerThread = new Thread(() -> autoplay_thread(frame, width, height, interval, layers_upper_limit, time_upper_limit));
+            Thread workerThread = new Thread(() -> autoplay_thread(frame, width, height, interval, time_upper_limit));
             new Thread(() -> {
                 while (continue_computation) {
                     try {
@@ -401,15 +401,6 @@ public class Main {
         label_1.setFont(bigFont);
         JLabel label_2 = new JLabel("Determinator");
         label_2.setFont(bigFont);
-        JPanel layers_inputPanel = new JPanel();
-        JLabel layers_inputLabel = new JLabel("Search layers upper limit: ");
-        layers_inputLabel.setFont(smallFont);
-        JTextField layers_textField = new JTextField(2);
-        layers_textField.setText("3");
-        layers_textField.setFont(smallFont);
-        layers_inputPanel.add(layers_inputLabel);
-        layers_inputPanel.add(layers_textField);
-        layers_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, layers_inputPanel.getPreferredSize().height));
         JPanel time_inputPanel = new JPanel();
         JLabel time_inputLabel = new JLabel("Search time upper limit: ");
         time_inputLabel.setFont(smallFont);
@@ -527,37 +518,34 @@ public class Main {
         autoplay_button.setMaximumSize(new Dimension(200, autoplay_button.getPreferredSize().height));
         JButton[] all_buttons = new JButton[]{random_move_button, all_moves_button, autoplay_button};
         random_move_button.addActionListener(e -> {
-            int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
             int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
             int width = get_positive_integer(frame, width_textField, "width");
             int height = get_positive_integer(frame, height_textField, "height");
-            if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height) {
-                get_and_show_predictions(frame, false, width, height, layers_upper_limit, time_upper_limit, all_buttons);
+            if (0 != time_upper_limit && 0 != width && 0 != height) {
+                get_and_show_predictions(frame, false, width, height, time_upper_limit, all_buttons);
             }
         });
         all_moves_button.addActionListener(e -> {
-            int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
             int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
             int width = get_positive_integer(frame, width_textField, "width");
             int height = get_positive_integer(frame, height_textField, "height");
-            if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height) {
-                get_and_show_predictions(frame, true, width, height, layers_upper_limit, time_upper_limit, all_buttons);
+            if (0 != time_upper_limit && 0 != width && 0 != height) {
+                get_and_show_predictions(frame, true, width, height, time_upper_limit, all_buttons);
             }
         });
         autoplay_button.addActionListener(e -> {
-            int layers_upper_limit = get_positive_integer(frame, layers_textField, "search layers upper limit");
             int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
             int width = get_positive_integer(frame, width_textField, "width");
             int height = get_positive_integer(frame, height_textField, "height");
             int interval = get_milliseconds(frame, interval_textField, "interval");
-            if (0 != layers_upper_limit && 0 != time_upper_limit && 0 != width && 0 != height && 0 != interval) {
-                autoplay(frame, width, height, interval, layers_upper_limit, time_upper_limit, all_buttons, autoplay_button);
+            if (0 != time_upper_limit && 0 != width && 0 != height && 0 != interval) {
+                autoplay(frame, width, height, interval, time_upper_limit, all_buttons, autoplay_button);
             }
         });
         JLabel label_3 = new JLabel("(Press Esc to stop computation)");
         label_3.setFont(smallFont);
         interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
-        JComponent[] components = {label_1, label_2, layers_inputPanel, time_inputPanel, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, autoplay_button, label_3};
+        JComponent[] components = {label_1, label_2, time_inputPanel, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, autoplay_button, label_3};
         for (JComponent component : components) {
             centerComponent(component);
             mainPanel.add(component);

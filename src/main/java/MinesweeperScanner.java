@@ -291,7 +291,7 @@ public class MinesweeperScanner {
         ScreenCapture.save_array_to_file(state.get_map_rgb_array(2), "Debug/scanned.png", "png");
         long start = System.currentTimeMillis();
         int time_upper_limit = 10000;
-        ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.get_predictions(1, start + time_upper_limit);
+        ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.get_predictions(start + time_upper_limit);
         Main.deleteRecursively(new File("Debug/predictions/"));
         int index = 0;
         for (Pair<Pair<Integer, Integer>, Character> prediction : predictions) {

@@ -324,6 +324,7 @@ public class MinesweeperState {
     private char[][] temp_map;
     private HashMap<Pair<Integer, Integer>, HashSet<Character>> possibility_map;
     private ArrayList<Pair<Integer, Integer>> all_points;
+    private ArrayList<Pair<Integer, Integer>> all_blanks;
     private long search_stop_before;
     private boolean force_stopped = false;
 
@@ -447,42 +448,6 @@ public class MinesweeperState {
         return force_stopped;
     }
 
-    private void initialize_get_predictions(int layers, long search_stop_before) {
-        this.search_stop_before = search_stop_before;
-        force_stopped = false;
-        all_points = new ArrayList<>();
-        prediction_tag = new boolean[nrows][ncols];
-        boolean[][] visited = new boolean[nrows][ncols];
-        for (int layer = 0; layer < layers; ++layer) {
-            for (int i = 0; i < nrows; ++i) {
-                for (int j = 0; j < ncols; ++j) {
-                    if (!is_unfinished_operand(map[i][j])) {
-                        visited[i][j] = true;
-                    }
-                    if (is_number(map[i][j])) {
-                        int min_i = Math.max(0, i - (layer + 1));
-                        int max_i = Math.min(nrows - 1, i + (layer + 1));
-                        int min_j = Math.max(0, j - (layer + 1));
-                        int max_j = Math.min(ncols - 1, j + (layer + 1));
-                        for (int new_i = min_i; new_i <= max_i; ++new_i) {
-                            for (int new_j = min_j; new_j <= max_j; ++new_j) {
-                                if (!visited[new_i][new_j] && is_unfinished_operand(map[new_i][new_j])) {
-                                    all_points.add(new Pair<>(new_i, new_j));
-                                    prediction_tag[new_i][new_j] = true;
-                                }
-                                visited[new_i][new_j] = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        possibility_map = new HashMap<>();
-        for (Pair<Integer, Integer> point : all_points) {
-            possibility_map.put(point, new HashSet<>());
-        }
-    }
-
     private void reset_possibility_map() {
         for (Pair<Integer, Integer> point : all_points) {
             possibility_map.get(point).clear();
@@ -513,12 +478,53 @@ public class MinesweeperState {
         return found;
     }
 
-    public ArrayList<Pair<Pair<Integer, Integer>, Character>> get_predictions(int layers, long search_stop_before) {
-        initialize_get_predictions(layers, search_stop_before);
+    private void initialize_get_predictions(long search_stop_before) {
+        this.search_stop_before = search_stop_before;
+        force_stopped = false;
+        all_points = new ArrayList<>();
+        all_blanks = new ArrayList<>();
+        prediction_tag = new boolean[nrows][ncols];
+        boolean[][] visited = new boolean[nrows][ncols];
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < ncols; ++j) {
+                if (is_unfinished_operand(map[i][j])) {
+                    all_blanks.add(new Pair<>(i, j));
+                } else {
+                    visited[i][j] = true;
+                }
+                if (is_number(map[i][j])) {
+                    int min_i = Math.max(0, i - 1);
+                    int max_i = Math.min(nrows - 1, i + 1);
+                    int min_j = Math.max(0, j - 1);
+                    int max_j = Math.min(ncols - 1, j + 1);
+                    for (int new_i = min_i; new_i <= max_i; ++new_i) {
+                        for (int new_j = min_j; new_j <= max_j; ++new_j) {
+                            if (!visited[new_i][new_j] && is_unfinished_operand(map[new_i][new_j])) {
+                                all_points.add(new Pair<>(new_i, new_j));
+                                prediction_tag[new_i][new_j] = true;
+                            }
+                            visited[new_i][new_j] = true;
+                        }
+                    }
+                }
+            }
+        }
+        possibility_map = new HashMap<>();
+        for (Pair<Integer, Integer> point : all_points) {
+            possibility_map.put(point, new HashSet<>());
+        }
+    }
+
+    public ArrayList<Pair<Pair<Integer, Integer>, Character>> get_predictions(long search_stop_before) {
+        initialize_get_predictions(search_stop_before);
         ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = new ArrayList<>();
         if (0 == remaining_mines) {
-            for (Pair<Integer, Integer> point : all_points) {
+            for (Pair<Integer, Integer> point : all_blanks) {
                 possibility_map.get(point).add(ZERO);
+            }
+        } else if (remaining_mines == all_blanks.size()) {
+            for (Pair<Integer, Integer> point : all_blanks) {
+                possibility_map.get(point).add(MINE_FLAG);
             }
         } else {
             initialize_temp_map();
@@ -546,16 +552,9 @@ public class MinesweeperState {
         return predictions;
     }
 
-    public ArrayList<Pair<Pair<Integer, Integer>, Character>> limit_layers_and_time_get_prediction(int layers_upper_limit, int time_upper_limit) {
+    public ArrayList<Pair<Pair<Integer, Integer>, Character>> limit_layers_and_time_get_prediction(int time_upper_limit) {
         long start_time = System.currentTimeMillis();
-        ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = get_predictions(1, start_time + time_upper_limit);
-        if (null != predictions && predictions.isEmpty()) {
-            int layers = 2;
-            while (!force_stopped && null != predictions && predictions.isEmpty() && layers <= layers_upper_limit && System.currentTimeMillis() - start_time < time_upper_limit) {
-                predictions = get_predictions(layers++, start_time + time_upper_limit);
-            }
-        }
-        return predictions;
+        return get_predictions(start_time + time_upper_limit);
     }
 
     public static void main(String[] args) {
@@ -572,6 +571,6 @@ public class MinesweeperState {
         int remaining_mines = 99;
         MinesweeperState state = new MinesweeperState(0, remaining_mines, maps);
         long start_time = System.currentTimeMillis();
-        System.out.println(state.get_predictions(3, start_time + 10000));
+        System.out.println(state.get_predictions(start_time + 10000));
     }
 }
