@@ -509,6 +509,9 @@ public class MinesweeperState {
                 }
             }
         }
+    }
+
+    private void initialize_possibility_map() {
         possibility_map = new HashMap<>();
         for (Pair<Integer, Integer> point : all_points) {
             possibility_map.put(point, new HashSet<>());
@@ -520,14 +523,15 @@ public class MinesweeperState {
         ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = new ArrayList<>();
         if (0 == remaining_mines) {
             for (Pair<Integer, Integer> point : all_blanks) {
-                possibility_map.get(point).add(ZERO);
+                predictions.add(new Pair<>(point, ZERO));
             }
         } else if (remaining_mines == all_blanks.size()) {
             for (Pair<Integer, Integer> point : all_blanks) {
-                possibility_map.get(point).add(MINE_FLAG);
+                predictions.add(new Pair<>(point, MINE_FLAG));
             }
         } else {
             initialize_temp_map();
+            initialize_possibility_map();
             ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
                 if (search_unfinished(block, remaining_mines)) {
@@ -540,13 +544,13 @@ public class MinesweeperState {
                     return predictions;
                 }
             }
-        }
-        for (Pair<Integer, Integer> point : all_points) {
-            HashSet<Character> possibility_set = possibility_map.get(point);
-            if (possibility_set.isEmpty()) {
-                return null;
-            } else if (1 == possibility_set.size()) {
-                predictions.add(new Pair<>(point, (Character) possibility_set.toArray()[0]));
+            for (Pair<Integer, Integer> point : all_points) {
+                HashSet<Character> possibility_set = possibility_map.get(point);
+                if (possibility_set.isEmpty()) {
+                    return null;
+                } else if (1 == possibility_set.size()) {
+                    predictions.add(new Pair<>(point, (Character) possibility_set.toArray()[0]));
+                }
             }
         }
         return predictions;
