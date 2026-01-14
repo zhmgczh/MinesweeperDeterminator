@@ -560,7 +560,6 @@ public class MinesweeperState {
                 }
             }
             if (blocks.size() != 1 && !has_found_predictions()) {
-                target_points = all_points;
                 initialize_possibility_map(target_points);
                 if (search_unfinished(target_points, remaining_mines, all_blanks.size(), all_blanks_included)) {
                     return predictions;
