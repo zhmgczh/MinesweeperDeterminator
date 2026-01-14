@@ -552,7 +552,7 @@ public class MinesweeperState {
             boolean all_blanks_included = all_points.size() == all_blanks.size();
             ArrayList<Pair<Integer, Integer>> target_points = all_points;
             initialize_temp_map();
-            initialize_possibility_map(all_points);
+            initialize_possibility_map(target_points);
             ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
                 if (search_unfinished(block, remaining_mines, all_blanks.size(), all_blanks_included && 1 == blocks.size())) {
