@@ -584,9 +584,8 @@ public class MinesweeperState {
         return predictions;
     }
 
-    public ArrayList<Pair<Pair<Integer, Integer>, Character>> limit_layers_and_time_get_prediction(int time_upper_limit) {
-        long start_time = System.currentTimeMillis();
-        return get_predictions(start_time + time_upper_limit);
+    public ArrayList<Pair<Pair<Integer, Integer>, Character>> limit_time_get_prediction(int time_upper_limit) {
+        return get_predictions(System.currentTimeMillis() + time_upper_limit);
     }
 
     public static void main(String[] args) {

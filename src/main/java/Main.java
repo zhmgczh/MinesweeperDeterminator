@@ -233,7 +233,7 @@ public class Main {
             int[][][] scanned_rgb_array = state.get_map_rgb_array();
             debug_scanned_board(state, scanned_rgb_array);
             if (check_status(state, frame)) {
-                ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_layers_and_time_get_prediction(time_upper_limit);
+                ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_time_get_prediction(time_upper_limit);
                 int[][][] marked_rgb_array;
                 if (null == predictions) {
                     illegal_board_warning(frame);
@@ -303,7 +303,7 @@ public class Main {
                 return false;
             }
             if (check_status(state, frame)) {
-                ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_layers_and_time_get_prediction(time_upper_limit);
+                ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions = state.limit_time_get_prediction(time_upper_limit);
                 if (null == predictions) {
                     illegal_board_warning(frame);
                 } else if (!predictions.isEmpty()) {
