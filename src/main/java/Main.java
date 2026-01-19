@@ -130,7 +130,6 @@ public class Main {
                 int dh = (int) Math.round(ih * s);
                 int x = (pw - dw) / 2;
                 int y = (ph - dh) / 2;
-                ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
                 g.drawImage(src, x, y, dw, dh, null);
             }
         };
