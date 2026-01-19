@@ -122,6 +122,12 @@ public class Main {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+                g2.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
                 BufferedImage src = (which == 0 ? img1 : img2);
                 int pw = getWidth(), ph = getHeight();
                 int iw = src.getWidth(), ih = src.getHeight();
@@ -130,7 +136,13 @@ public class Main {
                 int dh = (int) Math.round(ih * s);
                 int x = (pw - dw) / 2;
                 int y = (ph - dh) / 2;
-                g.drawImage(src, x, y, dw, dh, null);
+                g2.drawImage(src, x, y, dw, dh, null);
+                g2.dispose();
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(img1.getWidth(), img1.getHeight());
             }
         };
         f.setContentPane(p);
@@ -138,26 +150,12 @@ public class Main {
         f.setExtendedState(JFrame.MAXIMIZED_BOTH);
         f.setLocationRelativeTo(null);
         f.setVisible(true);
-        Dimension d = f.getContentPane().getSize();
-        int w = d.width;
-        int h = d.height;
-        final BufferedImage s1 = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        final Graphics2D g1 = s1.createGraphics();
-        g1.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g1.drawImage(img1, 0, 0, w, h, null);
-        g1.dispose();
-        final BufferedImage s2 = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        final Graphics2D g2 = s2.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.drawImage(img2, 0, 0, w, h, null);
-        g2.dispose();
         new javax.swing.Timer(1000, e -> {
-            p.getClass();
             try {
                 java.lang.reflect.Field fld = p.getClass().getDeclaredField("which");
                 fld.setAccessible(true);
                 fld.setInt(p, 1 - fld.getInt(p));
-            } catch (Exception ex) {
+            } catch (Exception _) {
             }
             p.repaint();
         }).start();
