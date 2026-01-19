@@ -438,9 +438,11 @@ public class MinesweeperState {
             for (Pair<Integer, Integer> number_point : numbers_in_domain) {
                 ArrayList<Pair<Integer, Integer>> prediction_points = get_prediction_points_in_domain(number_point.getFirst(), number_point.getSecond());
                 for (Pair<Integer, Integer> prediction_point : prediction_points) {
-                    set.union(point, prediction_point);
-                    graph.add_edge(point, prediction_point, 0);
-                    graph.add_edge(prediction_point, point, 0);
+                    if (!point.equals(prediction_point)) {
+                        set.union(point, prediction_point);
+                        graph.add_edge(point, prediction_point, 0);
+                        graph.add_edge(prediction_point, point, 0);
+                    }
                 }
             }
         }

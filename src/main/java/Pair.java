@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class Pair<T1, T2> {
     private final T1 first;
     private final T2 second;
@@ -20,8 +22,8 @@ public class Pair<T1, T2> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Pair<?, ?> pair = (Pair<?, ?>) o;
-        if (first != null ? !first.equals(pair.first) : pair.first != null) return false;
-        return second != null ? second.equals(pair.second) : pair.second == null;
+        if (!Objects.equals(first, pair.first)) return false;
+        return Objects.equals(second, pair.second);
     }
 
     @Override
