@@ -108,7 +108,6 @@ public class Main {
     public static JFrame makeFlipFrame(JFrame frame, final BufferedImage img1, final BufferedImage img2) {
         frame.setVisible(false);
         final JFrame f = new JFrame();
-        f.setExtendedState(JFrame.MAXIMIZED_BOTH);
         f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         f.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -131,14 +130,14 @@ public class Main {
                 int dh = (int) Math.round(ih * s);
                 int x = (pw - dw) / 2;
                 int y = (ph - dh) / 2;
-                g.drawImage(src, x, y, dw, dh, null);
                 ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g.drawImage(src, x, y, dw, dh, null);
             }
         };
         f.setContentPane(p);
         f.pack();
+        f.setExtendedState(JFrame.MAXIMIZED_BOTH);
         f.setLocationRelativeTo(null);
-        frame.setResizable(false);
         f.setVisible(true);
         Dimension d = f.getContentPane().getSize();
         int w = d.width;
