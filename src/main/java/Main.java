@@ -147,8 +147,8 @@ public class Main {
         };
         f.setContentPane(p);
         f.pack();
-        f.setExtendedState(JFrame.MAXIMIZED_BOTH);
         f.setLocationRelativeTo(null);
+        f.setExtendedState(JFrame.MAXIMIZED_BOTH);
         f.setVisible(true);
         new javax.swing.Timer(1000, e -> {
             try {
