@@ -441,7 +441,6 @@ public class MinesweeperState {
                     if (!point.equals(prediction_point)) {
                         set.union(point, prediction_point);
                         graph.add_edge(point, prediction_point, 0);
-                        graph.add_edge(prediction_point, point, 0);
                     }
                 }
             }
