@@ -8,7 +8,9 @@ import javax.swing.JTextField;
 import javax.swing.JPanel;
 
 public class Main {
-    private static boolean debug = false;
+    private static final boolean debug = false;
+    private static final Font bigFont = new Font("Helvetica", Font.BOLD, 32);
+    private static final Font smallFont = new Font("Helvetica", Font.PLAIN, 20);
 
     private static void debug_captured_screen(ScreenData screen) {
         if (debug) {
@@ -391,8 +393,6 @@ public class Main {
         }
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        Font bigFont = new Font("Arial", Font.BOLD, 32);
-        Font smallFont = new Font("Arial", Font.PLAIN, 20);
         JLabel label_1 = new JLabel("Minesweeper");
         label_1.setFont(bigFont);
         JLabel label_2 = new JLabel("Determinator");
