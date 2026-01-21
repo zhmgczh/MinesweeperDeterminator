@@ -162,7 +162,7 @@ public class MinesweeperState {
         }
         int blanks = 0;
         for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++) {
+            for (int j = 0; j < map[0].length; j++) {
                 if (is_unfinished_operand(map[i][j])) {
                     if (force_finished) {
                         return false;
@@ -488,14 +488,12 @@ public class MinesweeperState {
     }
 
     private boolean has_found_predictions() {
-        boolean found = false;
         for (Pair<Integer, Integer> point : all_points) {
             if (1 == possibility_map.get(point).size()) {
-                found = true;
-                break;
+                return true;
             }
         }
-        return found;
+        return false;
     }
 
     private void initialize_get_predictions(long search_stop_before) {
@@ -558,25 +556,29 @@ public class MinesweeperState {
 //                return gaussian_predictions;
 //            }
             boolean all_blanks_included = all_points.size() == all_blanks.size();
-            ArrayList<Pair<Integer, Integer>> target_points = all_points;
+            ArrayList<Pair<Integer, Integer>> target_points = new ArrayList<>();
             initialize_temp_map();
-            initialize_possibility_map(target_points);
+            initialize_possibility_map(all_points);
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
                 if (search_unfinished(block, remaining_mines, all_blanks.size(), all_blanks_included && 1 == blocks.size())) {
-                    return predictions;
+                    break;
                 }
+                target_points.addAll(block);
             }
-            if (blocks.size() != 1 && !has_found_predictions()) {
-                initialize_possibility_map(target_points);
-                if (search_unfinished(target_points, remaining_mines, all_blanks.size(), all_blanks_included)) {
-                    return predictions;
+            if (!force_stopped && !has_found_predictions()) {
+                if (blocks.size() != 1) {
+                    target_points = all_points;
+                    initialize_possibility_map(target_points);
+                    if (search_unfinished(target_points, remaining_mines, all_blanks.size(), all_blanks_included)) {
+                        return predictions;
+                    }
                 }
-            }
-            if (!all_blanks_included && !has_found_predictions()) {
-                target_points = all_blanks;
-                initialize_possibility_map(target_points);
-                if (search_unfinished(target_points, remaining_mines, all_blanks.size(), true)) {
-                    return predictions;
+                if (!all_blanks_included && !has_found_predictions()) {
+                    target_points = all_blanks;
+                    initialize_possibility_map(target_points);
+                    if (search_unfinished(target_points, remaining_mines, all_blanks.size(), true)) {
+                        return predictions;
+                    }
                 }
             }
             for (Pair<Integer, Integer> point : target_points) {
