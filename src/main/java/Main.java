@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 
 public class Main {
     private static final boolean debug = false;
-    private static final Font bigFont = new Font("Helvetica", Font.BOLD, 32);
+    private static final Font bigFont = new Font("Helvetica", Font.PLAIN, 32);
     private static final Font smallFont = new Font("Helvetica", Font.PLAIN, 20);
 
     private static void debug_captured_screen(ScreenData screen) {
