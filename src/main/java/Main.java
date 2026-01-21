@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.JTextField;
@@ -9,8 +10,45 @@ import javax.swing.JPanel;
 
 public class Main {
     private static final boolean debug = false;
-    private static final Font bigFont = new Font("Helvetica", Font.PLAIN, 32);
-    private static final Font smallFont = new Font("Helvetica", Font.PLAIN, 20);
+    private static Font bigFont;
+    private static Font smallFont;
+
+    static {
+        bigFont = loadFont("/fonts/Helvetica.ttf", Font.BOLD, 32);
+        smallFont = loadFont("/fonts/Helvetica.ttf", Font.PLAIN, 20);
+    }
+
+    private static boolean isValidFontStyle(int style) {
+        int allowed = Font.PLAIN | Font.BOLD | Font.ITALIC;
+        return (style & ~allowed) == 0;
+    }
+
+    private static Font loadFont(String resourcePath, int style, int size) {
+        Font derived = null;
+        if (isValidFontStyle(style)) {
+            derived = new Font("Helvetica", style, size);
+        } else {
+            System.err.println("Font style invalid: " + style);
+            derived = new Font("Helvetica", Font.PLAIN, size);
+        }
+        try (InputStream is = Main.class.getResourceAsStream(resourcePath)) {
+            if (is != null) {
+                Font base = Font.createFont(Font.TRUETYPE_FONT, is);
+                if (isValidFontStyle(style)) {
+                    derived = base.deriveFont(style, size);
+                } else {
+                    derived = base.deriveFont(Font.PLAIN, size);
+                }
+                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                ge.registerFont(base);
+            } else {
+                System.err.println("Font resource not found: " + resourcePath);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return derived;
+    }
 
     private static void debug_captured_screen(ScreenData screen) {
         if (debug) {
