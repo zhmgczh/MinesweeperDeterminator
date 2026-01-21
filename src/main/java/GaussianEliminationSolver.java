@@ -1,7 +1,7 @@
 import java.math.BigInteger;
 import java.util.*;
 
-class Rat {
+final class Rat {
     public static final Rat ZERO = new Rat(BigInteger.ZERO, BigInteger.ONE);
     public static final Rat ONE = new Rat(BigInteger.ONE, BigInteger.ONE);
     private final BigInteger num;
@@ -94,9 +94,14 @@ class Rat {
         if (den.equals(BigInteger.ONE)) return num.toString();
         return num.toString() + "/" + den;
     }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(num, den);
+    }
 }
 
-class GaussianRREF {
+final class GaussianRREF {
     public static Rat[][] rrefAugmented(BigInteger[][] A, BigInteger[] b) {
         int m = A.length;
         int n = (m == 0) ? 0 : A[0].length;
@@ -164,42 +169,300 @@ class GaussianRREF {
     }
 }
 
+final class BigIntMath {
+    private BigIntMath() {
+    }
+
+    static BigInteger abs(BigInteger x) {
+        return x.signum() < 0 ? x.negate() : x;
+    }
+
+    static BigInteger gcd(BigInteger a, BigInteger b) {
+        a = abs(a);
+        b = abs(b);
+        while (!b.equals(BigInteger.ZERO)) {
+            BigInteger t = a.mod(b);
+            a = b;
+            b = t;
+        }
+        return a;
+    }
+
+    static BigInteger rowGcd(BigInteger[] row) {
+        BigInteger g = BigInteger.ZERO;
+        for (BigInteger v : row) {
+            if (!v.equals(BigInteger.ZERO)) {
+                g = g.equals(BigInteger.ZERO) ? abs(v) : gcd(g, v);
+            }
+        }
+        return g;
+    }
+
+    static void normalizeRow(BigInteger[] row) {
+        BigInteger g = rowGcd(row);
+        if (g.compareTo(BigInteger.ONE) > 0) {
+            for (int i = 0; i < row.length; ++i) {
+                row[i] = row[i].divide(g);
+            }
+        }
+        for (BigInteger v : row) {
+            if (!v.equals(BigInteger.ZERO)) {
+                if (v.signum() < 0) {
+                    for (int i = 0; i < row.length; ++i) {
+                        row[i] = row[i].negate();
+                    }
+                }
+                break;
+            }
+        }
+    }
+}
+
+final class FractionFreeEchelon {
+    private FractionFreeEchelon() {
+    }
+
+    /**
+     * @param A matrix (m x n), rectangular
+     * @param b vector (length m)
+     * @return augmented matrix M (m x (n+1)) after fraction-free forward elimination (with per-row normalization)
+     */
+    static BigInteger[][] echelonAugmented(BigInteger[][] A, BigInteger[] b) {
+        int m = A.length;
+        int n = (m == 0) ? 0 : A[0].length;
+        if (b.length != m) {
+            throw new IllegalArgumentException("b length must equal number of rows in A");
+        }
+        BigInteger[][] M = new BigInteger[m][n + 1];
+        for (int i = 0; i < m; ++i) {
+            if (A[i].length != n) {
+                throw new IllegalArgumentException("A must be rectangular");
+            }
+            for (int j = 0; j < n; ++j) {
+                M[i][j] = A[i][j];
+            }
+            M[i][n] = b[i];
+            BigIntMath.normalizeRow(M[i]);
+        }
+        int row = 0;
+        for (int col = 0; col < n && row < m; ++col) {
+            int piv = -1;
+            for (int r = row; r < m; ++r) {
+                if (!M[r][col].equals(BigInteger.ZERO)) {
+                    piv = r;
+                    break;
+                }
+            }
+            if (piv == -1) continue;
+            if (piv != row) {
+                BigInteger[] tmp = M[piv];
+                M[piv] = M[row];
+                M[row] = tmp;
+            }
+            BigInteger pivot = M[row][col];
+            for (int r = row + 1; r < m; ++r) {
+                BigInteger a = M[r][col];
+                if (a.equals(BigInteger.ZERO)) continue;
+                BigInteger g = BigIntMath.gcd(pivot, a);
+                BigInteger mulRow = pivot.divide(g);
+                BigInteger mulPivot = a.divide(g);
+                for (int j = col; j <= n; ++j) {
+                    // M[r][j] = M[r][j] * mulRow - M[row][j] * mulPivot;
+                    M[r][j] = M[r][j].multiply(mulRow).subtract(M[row][j].multiply(mulPivot));
+                }
+                M[r][col] = BigInteger.ZERO;
+                BigIntMath.normalizeRow(M[r]);
+            }
+            BigIntMath.normalizeRow(M[row]);
+            ++row;
+        }
+        return M;
+    }
+
+    private static int pivotCol(BigInteger[] row) {
+        int n = row.length - 1;
+        for (int j = 0; j < n; ++j) {
+            if (!row[j].equals(BigInteger.ZERO)) return j;
+        }
+        return -1;
+    }
+
+    static BigInteger[][] backEliminateAugmented(BigInteger[][] M) {
+        int m = M.length;
+        if (m == 0) return M;
+        int n = M[0].length - 1;
+        int[] pivots = new int[m];
+        for (int i = 0; i < m; ++i) {
+            pivots[i] = pivotCol(M[i]);
+            BigIntMath.normalizeRow(M[i]);
+        }
+        for (int pr = m - 1; pr >= 0; --pr) {
+            int pc = pivots[pr];
+            if (pc == -1) continue;
+            BigInteger pivot = M[pr][pc];
+            for (int r = pr - 1; r >= 0; --r) {
+                BigInteger a = M[r][pc];
+                if (a.equals(BigInteger.ZERO)) continue;
+                BigInteger g = BigIntMath.gcd(pivot, a);
+                BigInteger mulRow = pivot.divide(g);
+                BigInteger mulPivot = a.divide(g);
+                for (int j = pc; j <= n; ++j) {
+                    M[r][j] = M[r][j].multiply(mulRow).subtract(M[pr][j].multiply(mulPivot));
+                }
+                M[r][pc] = BigInteger.ZERO;
+                BigIntMath.normalizeRow(M[r]);
+            }
+            BigIntMath.normalizeRow(M[pr]);
+        }
+        return M;
+    }
+
+    static BigInteger[][] echelonBackEliminateAugmented(BigInteger[][] A, BigInteger[] b) {
+        BigInteger[][] M = echelonAugmented(A, b);
+        return backEliminateAugmented(M);
+    }
+}
+
+final class BinaryBoundsPropagator {
+    static final class Result {
+        public final Map<Integer, BigInteger> forced;
+        public final boolean inconsistent;
+
+        Result(Map<Integer, BigInteger> forced, boolean inconsistent) {
+            this.forced = forced;
+            this.inconsistent = inconsistent;
+        }
+    }
+
+    public static Result propagate(BigInteger[][] M) {
+        int m = M.length;
+        if (m == 0) return new Result(new HashMap<>(), false);
+        int n = M[0].length - 1;
+        Map<Integer, BigInteger> forced = new HashMap<>();
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (BigInteger[] row : M) {
+                BigInteger b = row[n];
+                BigInteger totalMin = BigInteger.ZERO;
+                BigInteger totalMax = BigInteger.ZERO;
+                int unknownCount = 0;
+                for (int j = 0; j < n; ++j) {
+                    BigInteger a = row[j];
+                    if (a.equals(BigInteger.ZERO)) continue;
+                    unknownCount++;
+                    if (a.signum() > 0) {
+                        totalMax = totalMax.add(a);
+                    } else {
+                        totalMin = totalMin.add(a);
+                    }
+                }
+                if (unknownCount == 0) {
+                    if (!b.equals(BigInteger.ZERO)) return new Result(forced, true);
+                    continue;
+                }
+                if (b.compareTo(totalMin) < 0 || b.compareTo(totalMax) > 0) {
+                    return new Result(forced, true);
+                }
+                for (int k = 0; k < n; ++k) {
+                    BigInteger ak = row[k];
+                    if (ak.equals(BigInteger.ZERO)) continue;
+                    BigInteger minExclK = ak.signum() < 0 ? totalMin.subtract(ak) : totalMin;
+                    BigInteger maxExclK = ak.signum() > 0 ? totalMax.subtract(ak) : totalMax;
+                    boolean feasible0 = (b.compareTo(minExclK) >= 0 && b.compareTo(maxExclK) <= 0);
+                    BigInteger target1 = b.subtract(ak);
+                    boolean feasible1 = (target1.compareTo(minExclK) >= 0 && target1.compareTo(maxExclK) <= 0);
+                    if (!feasible0 && !feasible1) {
+                        return new Result(forced, true);
+                    } else if (feasible0 && !feasible1) {
+                        forced.put(k, BigInteger.ZERO);
+                        substitute(M, k, BigInteger.ZERO);
+                        changed = true;
+                        break;
+                    } else if (!feasible0 && feasible1) {
+                        forced.put(k, BigInteger.ONE);
+                        substitute(M, k, BigInteger.ONE);
+                        changed = true;
+                        break;
+                    }
+                }
+                if (changed) break;
+            }
+        }
+        return new Result(forced, false);
+    }
+
+    private static void substitute(BigInteger[][] M, int k, BigInteger val) {
+        int m = M.length;
+        int n = M[0].length - 1;
+        for (int i = 0; i < m; ++i) {
+            BigInteger ak = M[i][k];
+            if (ak.equals(BigInteger.ZERO)) continue;
+            if (val.equals(BigInteger.ONE)) {
+                M[i][n] = M[i][n].subtract(ak);
+            }
+            M[i][k] = BigInteger.ZERO;
+            BigIntMath.normalizeRow(M[i]);
+        }
+    }
+}
+
 public class GaussianEliminationSolver {
     private static BigInteger[] initialize_coefficients(final int length) {
         BigInteger[] coefficients = new BigInteger[length];
         Arrays.fill(coefficients, BigInteger.ZERO);
         return coefficients;
     }
+//    private static HashMap<Integer, Rat> get_unique_solutions(final BigInteger[][] A, final BigInteger[] b) {
+//        HashMap<Integer, Rat> unique_solutions = new HashMap<>();
+//        Rat[][] rref = GaussianRREF.rrefAugmented(A, b);
+//        int current_lower_j = 0;
+//        for (Rat[] rats : rref) {
+//            for (; current_lower_j < rref[0].length - 1; ++current_lower_j) {
+//                if (rats[current_lower_j].isOne()) {
+//                    break;
+//                }
+//            }
+//            if (current_lower_j == rref[0].length - 1) {
+//                if (rats[current_lower_j].isZero()) {
+//                    break;
+//                } else {
+//                    return null;
+//                }
+//            }
+//            boolean is_unique = true;
+//            for (int j = current_lower_j + 1; j < rref[0].length - 1; ++j) {
+//                if (!rats[j].isZero()) {
+//                    is_unique = false;
+//                }
+//            }
+//            if (is_unique) {
+//                unique_solutions.put(current_lower_j, rats[rref[0].length - 1]);
+//            }
+//            ++current_lower_j;
+//        }
+//        return unique_solutions;
+//    }
 
-    private static HashMap<Integer, Rat> get_unique_solutions(final BigInteger[][] A, final BigInteger[] b) {
-        HashMap<Integer, Rat> unique_solutions = new HashMap<>();
-        Rat[][] rref = GaussianRREF.rrefAugmented(A, b);
-        int current_lower_j = 0;
-        for (Rat[] rats : rref) {
-            for (; current_lower_j < rref[0].length - 1; ++current_lower_j) {
-                if (rats[current_lower_j].isOne()) {
-                    break;
-                }
-            }
-            if (current_lower_j == rref[0].length - 1) {
-                if (rats[current_lower_j].isZero()) {
-                    break;
-                } else {
-                    return null;
-                }
-            }
-            boolean is_unique = true;
-            for (int j = current_lower_j + 1; j < rref[0].length - 1; ++j) {
-                if (!rats[j].isZero()) {
-                    is_unique = false;
-                }
-            }
-            if (is_unique) {
-                unique_solutions.put(current_lower_j, rats[rref[0].length - 1]);
-            }
-            ++current_lower_j;
+    private static HashMap<Integer, Rat> get_unique_solutions(BigInteger[][] A, BigInteger[] b) {
+        BigInteger[][] M = FractionFreeEchelon.echelonBackEliminateAugmented(A, b);
+        BinaryBoundsPropagator.Result result = BinaryBoundsPropagator.propagate(M);
+        if (result.inconsistent) {
+            return null;
         }
-        return unique_solutions;
+        HashMap<Integer, Rat> uniqueSolutions = new HashMap<>();
+        for (Map.Entry<Integer, BigInteger> entry : result.forced.entrySet()) {
+            int idx = entry.getKey();
+            BigInteger val = entry.getValue();
+            if (val.equals(BigInteger.ZERO)) {
+                uniqueSolutions.put(idx, Rat.ZERO);
+            } else if (val.equals(BigInteger.ONE)) {
+                uniqueSolutions.put(idx, Rat.ONE);
+            } else {
+                return null;
+            }
+        }
+        return uniqueSolutions;
     }
 
     private static void process_number_point(final ArrayList<Pair<Integer, Integer>> block, final char[][] map, final boolean[][] prediction_tag, final Pair<Integer, Integer> number_point, final boolean[][] visited, final HashMap<Pair<Integer, Integer>, Integer> point_index, final ArrayList<BigInteger[]> A, final ArrayList<BigInteger> b) {
