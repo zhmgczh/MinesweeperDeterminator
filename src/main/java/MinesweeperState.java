@@ -434,7 +434,7 @@ public class MinesweeperState {
         UnionFindSet<Pair<Integer, Integer>> set = new UnionFindSet<>(all_points_hashset);
         Graph<Pair<Integer, Integer>> graph = new Graph<>(all_points_hashset);
         for (Pair<Integer, Integer> point : all_points) {
-            ArrayList<Pair<Integer, Integer>> numbers_in_domain = get_numbers_in_domain(temp_map, point.getFirst(), point.getSecond());
+            ArrayList<Pair<Integer, Integer>> numbers_in_domain = get_numbers_in_domain(map, point.getFirst(), point.getSecond());
             for (Pair<Integer, Integer> number_point : numbers_in_domain) {
                 ArrayList<Pair<Integer, Integer>> prediction_points = get_prediction_points_in_domain(number_point.getFirst(), number_point.getSecond());
                 for (Pair<Integer, Integer> prediction_point : prediction_points) {
@@ -550,11 +550,17 @@ public class MinesweeperState {
                 predictions.add(new Pair<>(point, MINE_FLAG));
             }
         } else {
+            ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
+            ArrayList<Pair<Pair<Integer, Integer>, Character>> gaussian_predictions = GaussianEliminationSolver.get_predictions_from_blocks(blocks, map, prediction_tag);
+            if (null == gaussian_predictions) {
+                return null;
+            } else if (!gaussian_predictions.isEmpty()) {
+                return gaussian_predictions;
+            }
             boolean all_blanks_included = all_points.size() == all_blanks.size();
             ArrayList<Pair<Integer, Integer>> target_points = all_points;
             initialize_temp_map();
             initialize_possibility_map(target_points);
-            ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
                 if (search_unfinished(block, remaining_mines, all_blanks.size(), all_blanks_included && 1 == blocks.size())) {
                     return predictions;
