@@ -551,12 +551,12 @@ public class MinesweeperState {
             }
         } else {
             ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
-            ArrayList<Pair<Pair<Integer, Integer>, Character>> gaussian_predictions = GaussianEliminationSolver.get_predictions_from_blocks(blocks, map, prediction_tag);
-            if (null == gaussian_predictions) {
-                return null;
-            } else if (!gaussian_predictions.isEmpty()) {
-                return gaussian_predictions;
-            }
+//            ArrayList<Pair<Pair<Integer, Integer>, Character>> gaussian_predictions = GaussianEliminationSolver.get_predictions_from_blocks(blocks, map, prediction_tag);
+//            if (null == gaussian_predictions) {
+//                return null;
+//            } else if (!gaussian_predictions.isEmpty()) {
+//                return gaussian_predictions;
+//            }
             boolean all_blanks_included = all_points.size() == all_blanks.size();
             ArrayList<Pair<Integer, Integer>> target_points = all_points;
             initialize_temp_map();
