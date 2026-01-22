@@ -550,6 +550,47 @@ public class MinesweeperState {
         return blocks;
     }
 
+    private ArrayList<ArrayList<Pair<Integer, Integer>>> get_blocks_raw() {
+        final int[][] index_map = new int[nrows][ncols];
+        for (int i = 0; i < all_points.size(); ++i) {
+            Pair<Integer, Integer> point = all_points.get(i);
+            index_map[point.getFirst()][point.getSecond()] = i;
+        }
+        RawUnionFindSet set = new RawUnionFindSet(all_points.size());
+        RawGraph graph = new RawGraph(all_points.size());
+        for (Pair<Integer, Integer> point : all_points) {
+            ArrayList<Pair<Integer, Integer>> numbers_in_domain = get_numbers_in_domain(map, point.getFirst(), point.getSecond());
+            for (Pair<Integer, Integer> number_point : numbers_in_domain) {
+                ArrayList<Pair<Integer, Integer>> prediction_points = get_prediction_points_in_domain(number_point.getFirst(), number_point.getSecond());
+                for (Pair<Integer, Integer> prediction_point : prediction_points) {
+                    if (!point.equals(prediction_point)) {
+                        set.union(index_map[point.getFirst()][point.getSecond()], index_map[prediction_point.getFirst()][prediction_point.getSecond()]);
+                        graph.add_edge(index_map[point.getFirst()][point.getSecond()], index_map[prediction_point.getFirst()][prediction_point.getSecond()], 0);
+                    }
+                }
+            }
+        }
+        ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = new ArrayList<>();
+        HashSet<Integer> visited = new HashSet<>();
+        for (int i = 0; i < all_points.size(); ++i) {
+            int root = set.find(i);
+            if (!visited.contains(root)) {
+                ArrayList<Integer> bfs_order = graph.get_bfs_order(root);
+                ArrayList<Pair<Integer, Integer>> real_bfs_order = new ArrayList<>();
+                for (int k : bfs_order) {
+                    real_bfs_order.add(all_points.get(k));
+                }
+                blocks.add(real_bfs_order);
+                visited.add(root);
+            }
+        }
+        all_points.clear();
+        for (ArrayList<Pair<Integer, Integer>> block : blocks) {
+            all_points.addAll(block);
+        }
+        return blocks;
+    }
+
     private boolean search_unfinished(ArrayList<Pair<Integer, Integer>> target_points, int base_offset, int remaining_mines, int number_of_blanks, boolean force_finished) {
         if (!force_stopped) {
             try {
@@ -644,7 +685,7 @@ public class MinesweeperState {
                 predictions.add(new Pair<>(point, MINE_FLAG));
             }
         } else {
-            ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks();
+            ArrayList<ArrayList<Pair<Integer, Integer>>> blocks = get_blocks_raw();
 //            ArrayList<Pair<Pair<Integer, Integer>, Character>> gaussian_predictions = GaussianEliminationSolver.get_predictions_from_blocks(blocks, map, prediction_tag);
 //            if (null == gaussian_predictions) {
 //                return null;
