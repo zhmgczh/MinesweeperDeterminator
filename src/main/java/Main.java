@@ -550,6 +550,7 @@ public class Main {
             radioGroupPanel.add(lbl, gbc);
             ++gbc.gridy;
         }
+        radioGroupPanel.setMaximumSize(radioGroupPanel.getPreferredSize());
         JButton random_move_button = new JButton("<html><center>Show one possible move randomly</center></html>");
         random_move_button.setFont(smallFont);
         random_move_button.setMaximumSize(new Dimension(200, random_move_button.getPreferredSize().height));
