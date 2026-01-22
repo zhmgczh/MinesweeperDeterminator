@@ -395,11 +395,11 @@ public class MinesweeperState {
             }
         } else if (0 == remaining_mines) {
             quick_set_and_check_valid(point_index, all_points, ZERO);
-            search(all_points, all_points.size(), base_offset, 0, number_of_blanks, force_finished);
+            search(all_points, base_offset, all_points.size(), 0, number_of_blanks, force_finished);
             quick_reset(all_points, point_index);
         } else if (number_of_blanks - point_index == remaining_mines) {
             quick_set_and_check_valid(point_index, all_points, MINE_FLAG);
-            search(all_points, all_points.size(), base_offset, 0, number_of_blanks, force_finished);
+            search(all_points, base_offset, all_points.size(), 0, number_of_blanks, force_finished);
             quick_reset(all_points, point_index);
         } else {
             int x = all_points.get(point_index).getFirst();
