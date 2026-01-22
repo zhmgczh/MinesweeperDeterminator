@@ -79,7 +79,7 @@ public class Graph<T> {
         }
         boolean[] visited = new boolean[nodes.size()];
         ArrayList<T> bfs = new ArrayList<>();
-        Queue<Integer> queue = new LinkedList<>();
+        Queue<Integer> queue = new ArrayDeque<>();
         int root_index = map.get(root);
         queue.offer(root_index);
         visited[root_index] = true;
