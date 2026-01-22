@@ -322,7 +322,7 @@ public class MinesweeperState {
     }
 
     private char[][] temp_map;
-    private HashMap<Pair<Integer, Integer>, HashSet<Character>> possibility_map;
+    private HashSet[] possibility_map;
     private ArrayList<Pair<Integer, Integer>> all_points;
     private ArrayList<Pair<Integer, Integer>> all_blanks;
     private long search_stop_before;
@@ -388,8 +388,9 @@ public class MinesweeperState {
         }
         if (point_index == all_points.size()) {
             if (check_temp_map_positions_valid(all_points, remaining_mines, force_finished)) {
-                for (Pair<Integer, Integer> point : all_points) {
-                    possibility_map.get(point).add(temp_map[point.getFirst()][point.getSecond()]);
+                for (int i = 0; i < all_points.size(); ++i) {
+                    Pair<Integer, Integer> point = all_points.get(i);
+                    possibility_map[i].add(temp_map[point.getFirst()][point.getSecond()]);
                 }
             }
         } else if (0 == remaining_mines) {
@@ -487,9 +488,9 @@ public class MinesweeperState {
         }
     }
 
-    private boolean has_found_predictions() {
-        for (Pair<Integer, Integer> point : all_points) {
-            if (1 == possibility_map.get(point).size()) {
+    private boolean has_found_predictions(int target_points_max_length) {
+        for (int i = 0; i < target_points_max_length; ++i) {
+            if (1 == possibility_map[i].size()) {
                 return true;
             }
         }
@@ -530,9 +531,9 @@ public class MinesweeperState {
     }
 
     private void initialize_possibility_map(ArrayList<Pair<Integer, Integer>> target_points) {
-        possibility_map = new HashMap<>();
-        for (Pair<Integer, Integer> point : target_points) {
-            possibility_map.put(point, new HashSet<>());
+        possibility_map = new HashSet[target_points.size()];
+        for (int i = 0; i < target_points.size(); ++i) {
+            possibility_map[i] = new HashSet<>();
         }
     }
 
@@ -556,33 +557,37 @@ public class MinesweeperState {
 //                return gaussian_predictions;
 //            }
             boolean all_blanks_included = all_points.size() == all_blanks.size();
-            ArrayList<Pair<Integer, Integer>> target_points = new ArrayList<>();
+            ArrayList<Pair<Integer, Integer>> target_points = all_points;
+            int target_points_max_length = 0;
             initialize_temp_map();
-            initialize_possibility_map(all_points);
+            initialize_possibility_map(target_points);
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
                 if (search_unfinished(block, remaining_mines, all_blanks.size(), all_blanks_included && 1 == blocks.size())) {
                     break;
                 }
-                target_points.addAll(block);
+                target_points_max_length += block.size();
             }
-            if (!force_stopped && !has_found_predictions()) {
+            if (!force_stopped && !has_found_predictions(target_points_max_length)) {
                 if (blocks.size() != 1) {
                     target_points = all_points;
                     initialize_possibility_map(target_points);
                     if (search_unfinished(target_points, remaining_mines, all_blanks.size(), all_blanks_included)) {
                         return predictions;
                     }
+                    target_points_max_length = all_points.size();
                 }
-                if (!all_blanks_included && !has_found_predictions()) {
+                if (!all_blanks_included && !has_found_predictions(target_points_max_length)) {
                     target_points = all_blanks;
                     initialize_possibility_map(target_points);
                     if (search_unfinished(target_points, remaining_mines, all_blanks.size(), true)) {
                         return predictions;
                     }
+                    target_points_max_length = all_blanks.size();
                 }
             }
-            for (Pair<Integer, Integer> point : target_points) {
-                HashSet<Character> possibility_set = possibility_map.get(point);
+            for (int i = 0; i < target_points_max_length; ++i) {
+                Pair<Integer, Integer> point = target_points.get(i);
+                HashSet<Character> possibility_set = possibility_map[i];
                 if (possibility_set.isEmpty()) {
                     return null;
                 } else if (1 == possibility_set.size()) {
