@@ -550,8 +550,12 @@ public class MinesweeperState {
         return blocks;
     }
 
+    private int[][] index_map;
+
     private ArrayList<ArrayList<Pair<Integer, Integer>>> get_blocks_raw() {
-        final int[][] index_map = new int[nrows][ncols];
+        if (null == index_map) {
+            index_map = new int[nrows][ncols];
+        }
         for (int i = 0; i < all_points.size(); ++i) {
             Pair<Integer, Integer> point = all_points.get(i);
             index_map[point.getFirst()][point.getSecond()] = i;
@@ -559,13 +563,19 @@ public class MinesweeperState {
         RawUnionFindSet set = new RawUnionFindSet(all_points.size());
         RawGraph graph = new RawGraph(all_points.size());
         for (Pair<Integer, Integer> point : all_points) {
-            ArrayList<Pair<Integer, Integer>> numbers_in_domain = get_numbers_in_domain(map, point.getFirst(), point.getSecond());
+            int point_first = point.getFirst();
+            int point_second = point.getSecond();
+            ArrayList<Pair<Integer, Integer>> numbers_in_domain = get_numbers_in_domain(map, point_first, point_second);
             for (Pair<Integer, Integer> number_point : numbers_in_domain) {
                 ArrayList<Pair<Integer, Integer>> prediction_points = get_prediction_points_in_domain(number_point.getFirst(), number_point.getSecond());
                 for (Pair<Integer, Integer> prediction_point : prediction_points) {
-                    if (!point.equals(prediction_point)) {
-                        set.union(index_map[point.getFirst()][point.getSecond()], index_map[prediction_point.getFirst()][prediction_point.getSecond()]);
-                        graph.add_edge(index_map[point.getFirst()][point.getSecond()], index_map[prediction_point.getFirst()][prediction_point.getSecond()], 0);
+                    int prediction_point_first = prediction_point.getFirst();
+                    int prediction_point_second = prediction_point.getSecond();
+                    if (!(point_first == prediction_point_first && point_second == prediction_point_second)) {
+                        int from_index = index_map[point_first][point_second];
+                        int to_index = index_map[prediction_point_first][prediction_point_second];
+                        set.union(from_index, to_index);
+                        graph.add_edge(from_index, to_index, 0);
                     }
                 }
             }
