@@ -5,6 +5,8 @@
       <element id="module-output" name="minesweeper-determinator" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/kwhat/jnativehook/2.2.2/jnativehook-2.2.2.jar" path-in-jar="/" />
       <element id="library" level="project" name="Maven: com.github.kwhat:jnativehook:2.2.2" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/formdev/flatlaf/3.5.1/flatlaf-3.5.1.jar" path-in-jar="/" />
+      <element id="library" level="project" name="Maven: com.formdev:flatlaf:3.5.1" />
     </root>
   </artifact>
 </component>

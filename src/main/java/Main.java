@@ -1,3 +1,5 @@
+import com.formdev.flatlaf.FlatLightLaf;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -12,12 +14,14 @@ import javax.swing.JPanel;
 
 public class Main {
     private static final boolean debug = false;
-    private static Font bigFont;
-    private static Font smallFont;
+    private static final Font bigFont;
+    private static final Font smallFont;
 
     static {
-        bigFont = loadFont("/fonts/Helvetica.ttf", Font.BOLD, 32);
-        smallFont = loadFont("/fonts/Helvetica.ttf", Font.PLAIN, 20);
+        Font defaultFont = UIManager.getFont("Label.font");
+        float baseSize = defaultFont.getSize2D();
+        bigFont = loadFont("/fonts/Helvetica.ttf", Font.BOLD, (int) (baseSize * 3.0f));
+        smallFont = loadFont("/fonts/Helvetica.ttf", Font.PLAIN, (int) (baseSize * 1.8f));
     }
 
     private static boolean isValidFontStyle(int style) {
@@ -29,6 +33,7 @@ public class Main {
         Font derived = null;
         if (isValidFontStyle(style)) {
             derived = new Font("Helvetica", style, size);
+
         } else {
             System.err.println("Font style invalid: " + style);
             derived = new Font("Helvetica", Font.PLAIN, size);
@@ -415,6 +420,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        FlatLightLaf.setup();
         JFrame frame = new JFrame("Minesweeper Determinator");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         register = MinesweeperAutoplay.register_exit_key(() -> {
@@ -553,10 +559,10 @@ public class Main {
         radioGroupPanel.setMaximumSize(radioGroupPanel.getPreferredSize());
         JButton random_move_button = new JButton("<html><center>Show one possible move randomly</center></html>");
         random_move_button.setFont(smallFont);
-        random_move_button.setMaximumSize(new Dimension(200, random_move_button.getPreferredSize().height));
+        random_move_button.setMaximumSize(new Dimension(random_move_button.getPreferredSize().width, random_move_button.getPreferredSize().height));
         JButton all_moves_button = new JButton("<html><center>Show all possible moves</center></html>");
         all_moves_button.setFont(smallFont);
-        all_moves_button.setMaximumSize(new Dimension(200, all_moves_button.getPreferredSize().height));
+        all_moves_button.setMaximumSize(new Dimension(all_moves_button.getPreferredSize().width, all_moves_button.getPreferredSize().height));
         JPanel interval_inputPanel = new JPanel();
         JLabel interval_inputLabel = new JLabel("Interval: ");
         interval_inputLabel.setFont(smallFont);
@@ -572,7 +578,7 @@ public class Main {
         JButton autoplay_button = new JButton();
         initialize_autoplay_button(autoplay_button);
         autoplay_button.setFont(smallFont);
-        autoplay_button.setMaximumSize(new Dimension(200, autoplay_button.getPreferredSize().height));
+        autoplay_button.setMaximumSize(new Dimension(autoplay_button.getPreferredSize().width, autoplay_button.getPreferredSize().height));
         JButton[] all_buttons = new JButton[]{random_move_button, all_moves_button, autoplay_button};
         random_move_button.addActionListener(_ -> {
             int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
