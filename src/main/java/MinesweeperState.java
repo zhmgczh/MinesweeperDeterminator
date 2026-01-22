@@ -410,121 +410,29 @@ public class MinesweeperState {
             temp_map[x][y] = BLANK;
         }
     }
-
-    //    private void search_iterative(ArrayList<Pair<Integer, Integer>> all_points, int base_offset, int remaining_mines, int number_of_blanks, boolean force_finished) {
-//        final class Frame {
-//            final ArrayList<Pair<Integer, Integer>> all_points;
-//            final int point_index;
-//            final int remaining_mines;
-//            final int number_of_blanks;
-//            final boolean force_finished;
-//            int stage = 0;
-//            int x, y;
-//
-//            Frame(ArrayList<Pair<Integer, Integer>> all_points, int point_index, int remaining_mines, int number_of_blanks, boolean force_finished) {
-//                this.all_points = all_points;
-//                this.point_index = point_index;
-//                this.remaining_mines = remaining_mines;
-//                this.number_of_blanks = number_of_blanks;
-//                this.force_finished = force_finished;
-//            }
-//        }
-//        Deque<Frame> stack = new ArrayDeque<>();
-//        stack.push(new Frame(all_points, 0, remaining_mines, number_of_blanks, force_finished));
-//        while (!stack.isEmpty()) {
-//            Frame f = stack.peek();
-//            if (f.stage == 0) {
-//                if (force_stopped) {
-//                    stack.pop();
-//                    continue;
-//                }
-//                if (f.point_index == f.all_points.size()) {
-//                    if (check_temp_map_positions_valid(f.all_points, f.remaining_mines, f.force_finished)) {
-//                        for (int i = 0; i < f.all_points.size(); ++i) {
-//                            Pair<Integer, Integer> p = f.all_points.get(i);
-//                            possibility_map[base_offset + i].add(temp_map[p.getFirst()][p.getSecond()]);
-//                        }
-//                    }
-//                    stack.pop();
-//                    continue;
-//                }
-//                if (0 == f.remaining_mines) {
-//                    quick_set(f.point_index, f.all_points, ZERO);
-//                    f.stage = 1;
-//                    stack.push(new Frame(f.all_points, f.all_points.size(), 0, f.number_of_blanks, f.force_finished));
-//                    continue;
-//                }
-//                if (f.number_of_blanks - f.point_index == f.remaining_mines) {
-//                    quick_set(f.point_index, f.all_points, MINE_FLAG);
-//                    f.stage = 2;
-//                    stack.push(new Frame(f.all_points, f.all_points.size(), 0, f.number_of_blanks, f.force_finished));
-//                    continue;
-//                }
-//                f.x = f.all_points.get(f.point_index).getFirst();
-//                f.y = f.all_points.get(f.point_index).getSecond();
-//                temp_map[f.x][f.y] = ZERO;
-//                f.stage = 3;
-//                if (check_temp_map_position_valid(f.x, f.y, false)) {
-//                    stack.push(new Frame(f.all_points, f.point_index + 1, f.remaining_mines, f.number_of_blanks, f.force_finished));
-//                }
-//                continue;
-//            }
-//            if (f.stage == 1) {
-//                quick_reset(f.all_points, f.point_index);
-//                stack.pop();
-//                continue;
-//            }
-//            if (f.stage == 2) {
-//                quick_reset(f.all_points, f.point_index);
-//                stack.pop();
-//                continue;
-//            }
-//            if (f.stage == 3) {
-//                temp_map[f.x][f.y] = MINE_FLAG;
-//                f.stage = 4;
-//                if (check_temp_map_position_valid(f.x, f.y, false)) {
-//                    stack.push(new Frame(f.all_points, f.point_index + 1, f.remaining_mines - 1, f.number_of_blanks, f.force_finished));
-//                }
-//                continue;
-//            }
-//            if (f.stage == 4) {
-//                temp_map[f.x][f.y] = BLANK;
-//                stack.pop();
-//            }
-//        }
-//    }
     private void search_iterative(ArrayList<Pair<Integer, Integer>> all_points, int base_offset, int remaining_mines, int number_of_blanks, boolean force_finished) {
         int maxDepth = all_points.size() + 5;
         int[] stack_point_index = new int[maxDepth];
         int[] stack_remaining_mines = new int[maxDepth];
-        int[] stack_number_of_blanks = new int[maxDepth];
-        boolean[] stack_force_finished = new boolean[maxDepth];
         int[] stack_stage = new int[maxDepth];
         int[] stack_x = new int[maxDepth];
         int[] stack_y = new int[maxDepth];
-        @SuppressWarnings("unchecked") ArrayList<Pair<Integer, Integer>>[] stack_all_points = new ArrayList[maxDepth];
         int stack_pointer = 0;
-        stack_all_points[stack_pointer] = all_points;
         stack_point_index[stack_pointer] = 0;
         stack_remaining_mines[stack_pointer] = remaining_mines;
-        stack_number_of_blanks[stack_pointer] = number_of_blanks;
-        stack_force_finished[stack_pointer] = force_finished;
         stack_stage[stack_pointer] = 0;
         while (stack_pointer >= 0) {
             int cur_point_index = stack_point_index[stack_pointer];
             int cur_remaining_mines = stack_remaining_mines[stack_pointer];
-            int cur_number_of_blanks = stack_number_of_blanks[stack_pointer];
-            boolean cur_force_finished = stack_force_finished[stack_pointer];
-            ArrayList<Pair<Integer, Integer>> cur_all_points = stack_all_points[stack_pointer];
             if (stack_stage[stack_pointer] == 0) {
                 if (force_stopped) {
                     --stack_pointer;
                     continue;
                 }
-                if (cur_point_index == cur_all_points.size()) {
-                    if (check_temp_map_positions_valid(cur_all_points, cur_remaining_mines, cur_force_finished)) {
-                        for (int i = 0; i < cur_all_points.size(); ++i) {
-                            Pair<Integer, Integer> p = cur_all_points.get(i);
+                if (cur_point_index == all_points.size()) {
+                    if (check_temp_map_positions_valid(all_points, cur_remaining_mines, force_finished)) {
+                        for (int i = 0; i < all_points.size(); ++i) {
+                            Pair<Integer, Integer> p = all_points.get(i);
                             possibility_map[base_offset + i].add(temp_map[p.getFirst()][p.getSecond()]);
                         }
                     }
@@ -532,51 +440,42 @@ public class MinesweeperState {
                     continue;
                 }
                 if (0 == cur_remaining_mines) {
-                    quick_set(cur_point_index, cur_all_points, ZERO);
+                    quick_set(cur_point_index, all_points, ZERO);
                     stack_stage[stack_pointer] = 1;
                     ++stack_pointer;
-                    stack_all_points[stack_pointer] = cur_all_points;
-                    stack_point_index[stack_pointer] = cur_all_points.size();
+                    stack_point_index[stack_pointer] = all_points.size();
                     stack_remaining_mines[stack_pointer] = 0;
-                    stack_number_of_blanks[stack_pointer] = cur_number_of_blanks;
-                    stack_force_finished[stack_pointer] = cur_force_finished;
                     stack_stage[stack_pointer] = 0;
                     continue;
                 }
-                if (cur_number_of_blanks - cur_point_index == cur_remaining_mines) {
-                    quick_set(cur_point_index, cur_all_points, MINE_FLAG);
+                if (number_of_blanks - cur_point_index == cur_remaining_mines) {
+                    quick_set(cur_point_index, all_points, MINE_FLAG);
                     stack_stage[stack_pointer] = 2;
                     ++stack_pointer;
-                    stack_all_points[stack_pointer] = cur_all_points;
-                    stack_point_index[stack_pointer] = cur_all_points.size();
+                    stack_point_index[stack_pointer] = all_points.size();
                     stack_remaining_mines[stack_pointer] = 0;
-                    stack_number_of_blanks[stack_pointer] = cur_number_of_blanks;
-                    stack_force_finished[stack_pointer] = cur_force_finished;
                     stack_stage[stack_pointer] = 0;
                     continue;
                 }
-                stack_x[stack_pointer] = cur_all_points.get(cur_point_index).getFirst();
-                stack_y[stack_pointer] = cur_all_points.get(cur_point_index).getSecond();
+                stack_x[stack_pointer] = all_points.get(cur_point_index).getFirst();
+                stack_y[stack_pointer] = all_points.get(cur_point_index).getSecond();
                 temp_map[stack_x[stack_pointer]][stack_y[stack_pointer]] = ZERO;
                 stack_stage[stack_pointer] = 3;
                 if (check_temp_map_position_valid(stack_x[stack_pointer], stack_y[stack_pointer], false)) {
                     ++stack_pointer;
-                    stack_all_points[stack_pointer] = cur_all_points;
                     stack_point_index[stack_pointer] = cur_point_index + 1;
                     stack_remaining_mines[stack_pointer] = cur_remaining_mines;
-                    stack_number_of_blanks[stack_pointer] = cur_number_of_blanks;
-                    stack_force_finished[stack_pointer] = cur_force_finished;
                     stack_stage[stack_pointer] = 0;
                 }
                 continue;
             }
             if (stack_stage[stack_pointer] == 1) {
-                quick_reset(cur_all_points, cur_point_index);
+                quick_reset(all_points, cur_point_index);
                 --stack_pointer;
                 continue;
             }
             if (stack_stage[stack_pointer] == 2) {
-                quick_reset(cur_all_points, cur_point_index);
+                quick_reset(all_points, cur_point_index);
                 --stack_pointer;
                 continue;
             }
@@ -585,11 +484,8 @@ public class MinesweeperState {
                 stack_stage[stack_pointer] = 4;
                 if (check_temp_map_position_valid(stack_x[stack_pointer], stack_y[stack_pointer], false)) {
                     ++stack_pointer;
-                    stack_all_points[stack_pointer] = cur_all_points;
                     stack_point_index[stack_pointer] = cur_point_index + 1;
                     stack_remaining_mines[stack_pointer] = cur_remaining_mines - 1;
-                    stack_number_of_blanks[stack_pointer] = cur_number_of_blanks;
-                    stack_force_finished[stack_pointer] = cur_force_finished;
                     stack_stage[stack_pointer] = 0;
                 }
                 continue;
