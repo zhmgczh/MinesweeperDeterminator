@@ -741,6 +741,7 @@ public class MinesweeperState {
     }
 
     private void initialize_get_predictions() {
+        force_stopped = false;
         all_points = new ArrayList<>();
         all_blanks = new ArrayList<>();
         prediction_tag = new boolean[nrows][ncols];
@@ -840,7 +841,6 @@ public class MinesweeperState {
     }
 
     public ArrayList<Pair<Pair<Integer, Integer>, Character>> limit_time_get_prediction(int time_upper_limit) {
-        force_stopped = false;
         Timer timer = new Timer(true);
         timer.schedule(new TimerTask() {
             @Override
