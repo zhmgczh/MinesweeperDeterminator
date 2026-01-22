@@ -30,7 +30,7 @@ public class Main {
     }
 
     private static Font loadFont(String resourcePath, int style, int size) {
-        Font derived = null;
+        Font derived;
         if (isValidFontStyle(style)) {
             derived = new Font("Helvetica", style, size);
         } else {
