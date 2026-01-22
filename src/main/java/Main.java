@@ -33,7 +33,6 @@ public class Main {
         Font derived = null;
         if (isValidFontStyle(style)) {
             derived = new Font("Helvetica", style, size);
-
         } else {
             System.err.println("Font style invalid: " + style);
             derived = new Font("Helvetica", Font.PLAIN, size);
@@ -89,12 +88,24 @@ public class Main {
         }
     }
 
+    private static void updateButtonMaximumSize(JButton button) {
+        Dimension newSize = button.getPreferredSize();
+        button.setMaximumSize(new Dimension(newSize.width, newSize.height));
+        Container parent = button.getParent();
+        if (parent != null) {
+            parent.revalidate();
+            parent.repaint();
+        }
+    }
+
     private static void initialize_autoplay_button(JButton autoplay_button) {
-        autoplay_button.setText("<html><center>Start autoplay</center></html>");
+        autoplay_button.setText("<html><center>Start autoplay</center><html>");
+        updateButtonMaximumSize(autoplay_button);
     }
 
     private static void change_autoplay_button(JButton autoplay_button) {
-        autoplay_button.setText("<html><center>Stop (Press Esc)</center></html>");
+        autoplay_button.setText("<html><center>Stop autoplay (Press Esc)</center><html>");
+        updateButtonMaximumSize(autoplay_button);
     }
 
     private static boolean check_status(MinesweeperState state, JFrame frame) {
@@ -437,8 +448,6 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         JLabel label_1 = new JLabel("Minesweeper");
         label_1.setFont(bigFont);
         JLabel label_2 = new JLabel("Determinator");
@@ -609,6 +618,8 @@ public class Main {
         label_3.setFont(smallFont);
         interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
         JComponent[] components = {label_1, label_2, time_inputPanel, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, autoplay_button, label_3};
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         for (JComponent component : components) {
             centerComponent(component);
             mainPanel.add(component);
