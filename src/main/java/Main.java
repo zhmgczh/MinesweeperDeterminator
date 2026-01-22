@@ -20,8 +20,8 @@ public class Main {
     static {
         Font defaultFont = UIManager.getFont("Label.font");
         float baseSize = defaultFont.getSize2D();
-        bigFont = loadFont("/fonts/Helvetica.ttf", Font.BOLD, (int) (baseSize * 3.0f));
-        smallFont = loadFont("/fonts/Helvetica.ttf", Font.PLAIN, (int) (baseSize * 1.8f));
+        bigFont = loadFont("/fonts/Helvetica.ttc", Font.BOLD, (int) (baseSize * 3.0f));
+        smallFont = loadFont("/fonts/Helvetica.ttc", Font.PLAIN, (int) (baseSize * 1.8f));
     }
 
     private static boolean isValidFontStyle(int style) {
