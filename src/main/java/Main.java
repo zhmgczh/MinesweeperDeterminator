@@ -611,9 +611,9 @@ public class Main {
         JScrollPane scrollPane = new JScrollPane(mainPanel);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         frame.setContentPane(scrollPane);
         frame.pack();
-        frame.setSize(frame.getWidth() + 20, frame.getHeight());
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setLocation((int) screenSize.getWidth() - frame.getWidth(), 0);
         frame.setAlwaysOnTop(true);
