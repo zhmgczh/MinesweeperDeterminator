@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
@@ -521,12 +523,32 @@ public class Main {
             height_textField.setEnabled(true);
         });
         JPanel radioGroupPanel = new JPanel();
-        radioGroupPanel.setLayout(new BoxLayout(radioGroupPanel, BoxLayout.Y_AXIS));
+        radioGroupPanel.setLayout(new GridBagLayout());
         radioGroupPanel.setOpaque(false);
         JRadioButton[] radios = {radio1, radio2, radio3, radio4, radio5, radio6};
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        gbc.anchor = GridBagConstraints.WEST;
         for (JRadioButton rb : radios) {
-            rb.setAlignmentX(Component.LEFT_ALIGNMENT);
-            radioGroupPanel.add(rb);
+            JLabel lbl = new JLabel(rb.getText());
+            rb.setText("");
+            rb.setFont(smallFont);
+            lbl.setFont(smallFont);
+            lbl.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (rb.isEnabled()) {
+                        rb.requestFocusInWindow();
+                        rb.doClick();
+                    }
+                }
+            });
+            gbc.gridx = 0;
+            radioGroupPanel.add(rb, gbc);
+            gbc.gridx = 1;
+            radioGroupPanel.add(lbl, gbc);
+            ++gbc.gridy;
         }
         JButton random_move_button = new JButton("<html><center>Show one possible move randomly</center></html>");
         random_move_button.setFont(smallFont);
@@ -551,7 +573,7 @@ public class Main {
         autoplay_button.setFont(smallFont);
         autoplay_button.setMaximumSize(new Dimension(200, autoplay_button.getPreferredSize().height));
         JButton[] all_buttons = new JButton[]{random_move_button, all_moves_button, autoplay_button};
-        random_move_button.addActionListener(e -> {
+        random_move_button.addActionListener(_ -> {
             int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
             int width = get_positive_integer(frame, width_textField, "width");
             int height = get_positive_integer(frame, height_textField, "height");
@@ -559,7 +581,7 @@ public class Main {
                 get_and_show_predictions(frame, false, width, height, time_upper_limit, all_buttons);
             }
         });
-        all_moves_button.addActionListener(e -> {
+        all_moves_button.addActionListener(_ -> {
             int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
             int width = get_positive_integer(frame, width_textField, "width");
             int height = get_positive_integer(frame, height_textField, "height");
@@ -567,7 +589,7 @@ public class Main {
                 get_and_show_predictions(frame, true, width, height, time_upper_limit, all_buttons);
             }
         });
-        autoplay_button.addActionListener(e -> {
+        autoplay_button.addActionListener(_ -> {
             int time_upper_limit = get_milliseconds(frame, time_textField, "search time upper limit");
             int width = get_positive_integer(frame, width_textField, "width");
             int height = get_positive_integer(frame, height_textField, "height");
