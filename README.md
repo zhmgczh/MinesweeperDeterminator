@@ -6,6 +6,8 @@
 
 Currently, it only focuses on the fitness of the website [https://minesweeper-pro.com/](https://minesweeper-pro.com/). The website is fully functionally cloned in the repository [MinesweeperPro](https://github.com/zhmgczh/MinesweeperPro) and is deployed at [https://zhmgczh.github.io/MinesweeperPro/](https://zhmgczh.github.io/MinesweeperPro/).
 
+![Minesweeper Determinator](demo.png)
+
 ## Features
 
 - 📷 **Screen Capture and Analysis**: Automatically captures and recognizes the current Minesweeper board state from the screen.
