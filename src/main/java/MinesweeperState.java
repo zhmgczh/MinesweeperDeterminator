@@ -410,6 +410,7 @@ public class MinesweeperState {
             temp_map[x][y] = BLANK;
         }
     }
+
     private void search_iterative(ArrayList<Pair<Integer, Integer>> all_points, int base_offset, int remaining_mines, int number_of_blanks, boolean force_finished) {
         int maxDepth = all_points.size() + 5;
         int[] stack_point_index = new int[maxDepth];
@@ -736,18 +737,33 @@ public class MinesweeperState {
         return predictions;
     }
 
+    private final Queue<Timer> timers = new ArrayDeque<>();
+    private final Queue<TimerTask> tasks = new ArrayDeque<>();
+
     public ArrayList<Pair<Pair<Integer, Integer>, Character>> limit_time_get_prediction(int time_upper_limit) {
+        while (!tasks.isEmpty()) {
+            TimerTask task = tasks.poll();
+            task.cancel();
+        }
+        while (!timers.isEmpty()) {
+            Timer timer = timers.poll();
+            timer.cancel();
+        }
         Timer timer = new Timer(true);
-        timer.schedule(new TimerTask() {
+        timers.offer(timer);
+        TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 force_stopped = true;
             }
-        }, time_upper_limit);
+        };
+        tasks.offer(task);
+        timer.schedule(task, time_upper_limit);
         ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions;
         try {
             predictions = get_predictions();
         } finally {
+            task.cancel();
             timer.cancel();
         }
         return predictions;
