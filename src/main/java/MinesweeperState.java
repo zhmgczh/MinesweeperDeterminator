@@ -737,27 +737,23 @@ public class MinesweeperState {
         return predictions;
     }
 
-    private final Queue<Timer> timers = new ArrayDeque<>();
-    private final Queue<TimerTask> tasks = new ArrayDeque<>();
+    private Timer timer;
+    private TimerTask task;
 
     public ArrayList<Pair<Pair<Integer, Integer>, Character>> limit_time_get_prediction(int time_upper_limit) {
-        while (!tasks.isEmpty()) {
-            TimerTask task = tasks.poll();
+        if (null != task) {
             task.cancel();
         }
-        while (!timers.isEmpty()) {
-            Timer timer = timers.poll();
+        if (null != timer) {
             timer.cancel();
         }
-        Timer timer = new Timer(true);
-        timers.offer(timer);
-        TimerTask task = new TimerTask() {
+        timer = new Timer(true);
+        task = new TimerTask() {
             @Override
             public void run() {
                 force_stopped = true;
             }
         };
-        tasks.offer(task);
         timer.schedule(task, time_upper_limit);
         ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions;
         try {
