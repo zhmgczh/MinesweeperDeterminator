@@ -99,12 +99,12 @@ public class Main {
     }
 
     private static void initialize_autoplay_button(JButton autoplay_button) {
-        autoplay_button.setText("<html><center>Start autoplay</center><html>");
+        autoplay_button.setText("Start autoplay");
         updateButtonMaximumSize(autoplay_button);
     }
 
     private static void change_autoplay_button(JButton autoplay_button) {
-        autoplay_button.setText("<html><center>Stop autoplay (Press Esc)</center><html>");
+        autoplay_button.setText("Stop autoplay (Press Esc)");
         updateButtonMaximumSize(autoplay_button);
     }
 
@@ -432,8 +432,6 @@ public class Main {
 
     public static void main(String[] args) {
         FlatLightLaf.setup();
-        JFrame frame = new JFrame("Minesweeper Determinator");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         register = MinesweeperAutoplay.register_exit_key(() -> {
         }, () -> {
             if (continue_computation) {
@@ -441,6 +439,8 @@ public class Main {
                 continue_computation = false;
             }
         });
+        JFrame frame = new JFrame("Minesweeper Determinator");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         try {
             BufferedImage icon = ScreenCapture.load_image_from_file("/images/icon.png");
             frame.setIconImage(icon);
@@ -463,7 +463,6 @@ public class Main {
         time_inputPanel.add(time_inputLabel);
         time_inputPanel.add(time_textField);
         time_inputPanel.add(time_unitLabel1);
-        time_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, time_inputPanel.getPreferredSize().height));
         JPanel width_inputPanel = new JPanel();
         JLabel width_inputLabel = new JLabel("Width: ");
         width_inputLabel.setFont(smallFont);
@@ -473,7 +472,6 @@ public class Main {
         width_textField.setFont(smallFont);
         width_inputPanel.add(width_inputLabel);
         width_inputPanel.add(width_textField);
-        width_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, width_inputPanel.getPreferredSize().height));
         JPanel height_inputPanel = new JPanel();
         JLabel height_inputLabel = new JLabel("Height: ");
         height_inputLabel.setFont(smallFont);
@@ -483,7 +481,6 @@ public class Main {
         height_textField.setFont(smallFont);
         height_inputPanel.add(height_inputLabel);
         height_inputPanel.add(height_textField);
-        height_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, height_inputPanel.getPreferredSize().height));
         JRadioButton radio1 = new JRadioButton("Beginner");
         radio1.setFont(smallFont);
         JRadioButton radio2 = new JRadioButton("Intermediate");
@@ -565,13 +562,10 @@ public class Main {
             radioGroupPanel.add(lbl, gbc);
             ++gbc.gridy;
         }
-        radioGroupPanel.setMaximumSize(radioGroupPanel.getPreferredSize());
-        JButton random_move_button = new JButton("<html><center>Show one possible move randomly</center></html>");
+        JButton random_move_button = new JButton("Show one possible move randomly");
         random_move_button.setFont(smallFont);
-        random_move_button.setMaximumSize(new Dimension(random_move_button.getPreferredSize().width, random_move_button.getPreferredSize().height));
-        JButton all_moves_button = new JButton("<html><center>Show all possible moves</center></html>");
+        JButton all_moves_button = new JButton("Show all possible moves");
         all_moves_button.setFont(smallFont);
-        all_moves_button.setMaximumSize(new Dimension(all_moves_button.getPreferredSize().width, all_moves_button.getPreferredSize().height));
         JPanel interval_inputPanel = new JPanel();
         JLabel interval_inputLabel = new JLabel("Interval: ");
         interval_inputLabel.setFont(smallFont);
@@ -583,7 +577,6 @@ public class Main {
         interval_inputPanel.add(interval_inputLabel);
         interval_inputPanel.add(interval_textField);
         interval_inputPanel.add(time_unitLabel);
-        interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
         JButton autoplay_button = new JButton();
         initialize_autoplay_button(autoplay_button);
         autoplay_button.setFont(smallFont);
@@ -616,7 +609,6 @@ public class Main {
         });
         JLabel label_3 = new JLabel("(Press Esc to stop computation)");
         label_3.setFont(smallFont);
-        interval_inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, interval_inputPanel.getPreferredSize().height));
         JComponent[] components = {label_1, label_2, time_inputPanel, radioGroupPanel, width_inputPanel, height_inputPanel, random_move_button, all_moves_button, interval_inputPanel, autoplay_button, label_3};
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -628,7 +620,6 @@ public class Main {
         JScrollPane scrollPane = new JScrollPane(mainPanel);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         frame.setContentPane(scrollPane);
         frame.pack();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
