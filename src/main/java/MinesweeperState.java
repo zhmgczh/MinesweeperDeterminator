@@ -760,7 +760,9 @@ public class MinesweeperState {
             predictions = get_predictions();
         } finally {
             task.cancel();
+            task = null;
             timer.cancel();
+            timer = null;
         }
         return predictions;
     }

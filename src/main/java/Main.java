@@ -25,6 +25,10 @@ public class Main {
         UIManager.put("OptionPane.messageFont", smallFont);
         UIManager.put("OptionPane.buttonFont", smallFont);
         UIManager.put("InternalFrame.titleFont", smallFont);
+        UIManager.put("OptionPane.okButtonText", "OK");
+        UIManager.put("OptionPane.cancelButtonText", "Cancel");
+        UIManager.put("OptionPane.yesButtonText", "Yes");
+        UIManager.put("OptionPane.noButtonText", "No");
     }
 
     private static boolean isValidFontStyle(int style) {
