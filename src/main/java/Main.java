@@ -22,6 +22,9 @@ public class Main {
         float baseSize = defaultFont.getSize2D();
         bigFont = loadFont("/fonts/Helvetica.ttc", Font.BOLD, (int) (baseSize * 3.0f));
         smallFont = loadFont("/fonts/Helvetica.ttc", Font.PLAIN, (int) (baseSize * 1.8f));
+        UIManager.put("OptionPane.messageFont", smallFont);
+        UIManager.put("OptionPane.buttonFont", smallFont);
+        UIManager.put("InternalFrame.titleFont", smallFont);
     }
 
     private static boolean isValidFontStyle(int style) {
