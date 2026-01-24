@@ -770,7 +770,7 @@ public class MinesweeperState {
                     return null;
                 }
             }
-            if (predictions.isEmpty() && 1 == final_remaining_mines_possibilities.size()) {
+            if (!force_stopped && predictions.isEmpty() && 1 == final_remaining_mines_possibilities.size()) {
                 int final_remaining_mines = (int) final_remaining_mines_possibilities.toArray()[0];
                 if (0 == final_remaining_mines) {
                     for (Pair<Integer, Integer> point : all_blanks) {
