@@ -358,6 +358,7 @@ public class MinesweeperState {
 
     private char[][] temp_map;
     private HashSet<Character>[] possibility_map;
+    private HashSet<Integer> final_remaining_mines_possibilities;
     private ArrayList<Pair<Integer, Integer>> all_points;
     private ArrayList<Pair<Integer, Integer>> all_blanks;
     private volatile boolean force_stopped = false;
@@ -422,6 +423,7 @@ public class MinesweeperState {
                     Pair<Integer, Integer> point = all_points.get(i);
                     possibility_map[base_offset + i].add(temp_map[point.getFirst()][point.getSecond()]);
                 }
+                final_remaining_mines_possibilities.add(remaining_mines);
             }
         } else if (0 == remaining_mines) {
             quick_set(point_index, all_points, ZERO);
@@ -471,6 +473,7 @@ public class MinesweeperState {
                             Pair<Integer, Integer> p = all_points.get(i);
                             possibility_map[base_offset + i].add(temp_map[p.getFirst()][p.getSecond()]);
                         }
+                        final_remaining_mines_possibilities.add(cur_remaining_mines);
                     }
                     --stack_pointer;
                     continue;
@@ -705,6 +708,10 @@ public class MinesweeperState {
         for (int i = 0; i < target_points.size(); ++i) {
             possibility_map[i] = new HashSet<>();
         }
+        if (null == final_remaining_mines_possibilities) {
+            final_remaining_mines_possibilities = new HashSet<>();
+        }
+        final_remaining_mines_possibilities.clear();
     }
 
     private boolean summarize_predictions_failed(ArrayList<Pair<Integer, Integer>> target_points, int start, int end, ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions) {
@@ -761,6 +768,22 @@ public class MinesweeperState {
                 }
                 if (summarize_predictions_failed(target_points, 0, target_points_max_length, predictions)) {
                     return null;
+                }
+            }
+            if (predictions.isEmpty() && 1 == final_remaining_mines_possibilities.size()) {
+                int final_remaining_mines = (int) final_remaining_mines_possibilities.toArray()[0];
+                if (0 == final_remaining_mines) {
+                    for (Pair<Integer, Integer> point : all_blanks) {
+                        if (!prediction_tag[point.getFirst()][point.getSecond()]) {
+                            predictions.add(new Pair<>(point, ZERO));
+                        }
+                    }
+                } else if (all_blanks.size() - all_points.size() == final_remaining_mines) {
+                    for (Pair<Integer, Integer> point : all_blanks) {
+                        if (!prediction_tag[point.getFirst()][point.getSecond()]) {
+                            predictions.add(new Pair<>(point, MINE_FLAG));
+                        }
+                    }
                 }
             }
         }
