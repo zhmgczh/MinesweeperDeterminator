@@ -671,9 +671,23 @@ public class MinesweeperState {
 
     private void initialize_get_predictions() {
         force_stopped = false;
-        all_points = new ArrayList<>();
-        all_blanks = new ArrayList<>();
-        prediction_tag = new boolean[nrows][ncols];
+        if (null == all_points) {
+            all_points = new ArrayList<>();
+        } else {
+            all_points.clear();
+        }
+        if (null == all_blanks) {
+            all_blanks = new ArrayList<>();
+        } else {
+            all_blanks.clear();
+        }
+        if (null == prediction_tag || prediction_tag.length != nrows || prediction_tag[0].length != ncols) {
+            prediction_tag = new boolean[nrows][ncols];
+        } else {
+            for (boolean[] row : prediction_tag) {
+                Arrays.fill(row, false);
+            }
+        }
         boolean[][] visited = new boolean[nrows][ncols];
         for (int i = 0; i < nrows; ++i) {
             for (int j = 0; j < ncols; ++j) {
@@ -704,14 +718,22 @@ public class MinesweeperState {
     }
 
     private void initialize_possibility_map(ArrayList<Pair<Integer, Integer>> target_points) {
-        possibility_map = new HashSet[target_points.size()];
-        for (int i = 0; i < target_points.size(); ++i) {
-            possibility_map[i] = new HashSet<>();
+        if (null == possibility_map || possibility_map.length != target_points.size()) {
+            possibility_map = new HashSet[target_points.size()];
+            for (int i = 0; i < target_points.size(); ++i) {
+                possibility_map[i] = new HashSet<>();
+            }
+        } else {
+            for (int i = 0; i < target_points.size(); ++i) {
+                possibility_map[i].clear();
+            }
         }
         if (null == final_remaining_mines_possibilities) {
             final_remaining_mines_possibilities = new HashSet<>();
         }
-        final_remaining_mines_possibilities.clear();
+        else{
+            final_remaining_mines_possibilities.clear();
+        }
     }
 
     private boolean summarize_predictions_failed(ArrayList<Pair<Integer, Integer>> target_points, int start, int end, ArrayList<Pair<Pair<Integer, Integer>, Character>> predictions) {
