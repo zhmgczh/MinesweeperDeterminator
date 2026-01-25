@@ -18,7 +18,7 @@ Currently, it only focuses on the fitness of the website [https://minesweeper-pr
 
 ## Requirements
 
-- OpenJDK 22 or above
+- OpenJDK 25 or above
 - A browser with the website [https://minesweeper-pro.com/](https://minesweeper-pro.com/) (or [https://zhmgczh.github.io/MinesweeperPro/](https://zhmgczh.github.io/MinesweeperPro/)) open
 - Desktop environment (not headless)
 
