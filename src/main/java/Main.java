@@ -353,7 +353,7 @@ public class Main {
             debug_captured_screen(screen);
             try {
                 MinesweeperState temporary_state = minesweeperScanner.scan(screen, debug);
-                state.reset(temporary_state.getTimePassed(), temporary_state.getRemainingMines(), temporary_state.getMap(), true);
+                state.reset(temporary_state.get_time_passed(), temporary_state.get_remaining_mines(), temporary_state.get_map(), true);
             } catch (Exception ex) {
                 if (ex instanceof IllegalMapException) {
                     illegal_board_warning(frame);

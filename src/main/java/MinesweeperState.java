@@ -95,16 +95,51 @@ public class MinesweeperState {
         }
     }
 
-    public int getTimePassed() {
+    public int get_time_passed() {
         return time_passed;
     }
 
-    public int getRemainingMines() {
+    public int get_remaining_mines() {
         return remaining_mines;
     }
 
-    public char[][] getMap() {
+    public char[][] get_map() {
         return map;
+    }
+
+    public int get_nrows() {
+        return nrows;
+    }
+
+    public int get_ncols() {
+        return ncols;
+    }
+
+    public char get_state(int i, int j) {
+        if (i >= 0 && i < nrows && j >= 0 && j < ncols) {
+            return map[i][j];
+        }
+        return ' ';
+    }
+
+    public static String get_map_as_string(char[][] map) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < map[0].length; ++i) {
+            sb.append(map[0][i]);
+            for (int j = 1; j < map.length; ++j) {
+                sb.append(' ').append(map[j][i]);
+            }
+            sb.append('\n');
+        }
+        return sb.toString();
+    }
+
+    public String get_map_as_string() {
+        return get_map_as_string(map);
+    }
+
+    public String toString() {
+        return "Time passed: " + time_passed + " Remaining mines: " + remaining_mines + "\nWidth: " + nrows + " Height: " + ncols + '\n' + get_map_as_string();
     }
 
     private void initialize_point_pool_position(int i, int j) {
@@ -195,7 +230,7 @@ public class MinesweeperState {
     }
 
     public static boolean check_map_valid(char[][] map, int remaining_mines, boolean force_finished) {
-        if (force_finished && 0 != remaining_mines) {
+        if (force_finished && remaining_mines != 0) {
             return false;
         }
         int blanks = 0;
@@ -233,37 +268,6 @@ public class MinesweeperState {
             }
         }
         return numbers;
-    }
-
-    public int get_nrows() {
-        return nrows;
-    }
-
-    public int get_ncols() {
-        return ncols;
-    }
-
-    public char get_state(int i, int j) {
-        if (i >= 0 && j >= 0 && i < nrows && j < map[0].length) {
-            return map[i][j];
-        }
-        return ' ';
-    }
-
-    public static String get_map_as_string(char[][] map) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < map[0].length; ++i) {
-            sb.append(map[0][i]);
-            for (int j = 1; j < map.length; ++j) {
-                sb.append(' ').append(map[j][i]);
-            }
-            sb.append('\n');
-        }
-        return sb.toString();
-    }
-
-    public String toString() {
-        return "Time passed: " + time_passed + " Remaining mines: " + remaining_mines + "\nWidth: " + nrows + " Height: " + ncols + '\n' + get_map_as_string(map);
     }
 
     public static int[][][] get_map_rgb_array(char[][] map) {
@@ -377,7 +381,7 @@ public class MinesweeperState {
     }
 
     private boolean check_temp_map_positions_valid(ArrayList<Pair<Integer, Integer>> all_points, int remaining_mines, boolean force_finished) {
-        if (force_finished && 0 != remaining_mines) {
+        if (force_finished && remaining_mines != 0) {
             return false;
         }
         for (Pair<Integer, Integer> point : all_points) {
@@ -730,8 +734,7 @@ public class MinesweeperState {
         }
         if (null == final_remaining_mines_possibilities) {
             final_remaining_mines_possibilities = new HashSet<>();
-        }
-        else{
+        } else {
             final_remaining_mines_possibilities.clear();
         }
     }
