@@ -771,7 +771,7 @@ public class MinesweeperState {
             initialize_temp_map();
             initialize_possibility_map(target_points);
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
-                if (search_iterative_unfinished(block, target_points_max_length, remaining_mines, all_blanks.size(), all_blanks_included && 1 == blocks.size())) {
+                if (search_iterative_unfinished(block, target_points_max_length, remaining_mines, all_blanks.size() - predictions.size(), all_blanks_included && 1 == blocks.size())) {
                     return predictions;
                 }
                 if (summarize_predictions_failed(target_points, target_points_max_length, target_points_max_length + block.size(), predictions)) {
