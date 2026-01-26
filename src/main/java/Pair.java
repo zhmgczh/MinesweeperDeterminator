@@ -19,10 +19,16 @@ public class Pair<T1, T2> {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final Pair<?, ?> pair = (Pair<?, ?>) o;
-        if (!Objects.equals(first, pair.first)) return false;
+        if (!Objects.equals(first, pair.first)) {
+            return false;
+        }
         return Objects.equals(second, pair.second);
     }
 
