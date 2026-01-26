@@ -368,12 +368,32 @@ public class MinesweeperState {
     private int mines_already_determined;
     private volatile boolean force_stopped = false;
 
+    private boolean check_temp_map_number_valid(int i, int j, boolean force_finished) {
+        int mines = 0;
+        int blanks = 0;
+        for (int[] vector : unit_vectors) {
+            int new_i = i + vector[0];
+            int new_j = j + vector[1];
+            if (new_i >= 0 && new_i < temp_map.length && new_j >= 0 && new_j < temp_map[0].length) {
+                if (MINE_FLAG == temp_map[new_i][new_j]) {
+                    ++mines;
+                } else if (BLANK == temp_map[new_i][new_j]) {
+                    ++blanks;
+                }
+            }
+        }
+        if (force_finished && mines != to_number(temp_map[i][j])) {
+            return false;
+        }
+        return mines <= to_number(temp_map[i][j]) && mines + blanks >= to_number(temp_map[i][j]);
+    }
+
     private boolean check_temp_map_position_valid(int i, int j, boolean force_finished) {
         for (int[] unit_vector : unit_vectors) {
             int number_x = i + unit_vector[0];
             int number_y = j + unit_vector[1];
             if (number_x >= 0 && number_x < nrows && number_y >= 0 && number_y < ncols && is_number(map[number_x][number_y])) {
-                if (!check_number_valid(temp_map, number_x, number_y, force_finished)) {
+                if (!check_temp_map_number_valid(number_x, number_y, force_finished)) {
                     return false;
                 }
             }
