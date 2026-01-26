@@ -365,6 +365,7 @@ public class MinesweeperState {
     private HashSet<Integer> final_remaining_mines_possibilities;
     private ArrayList<Pair<Integer, Integer>> all_points;
     private ArrayList<Pair<Integer, Integer>> all_blanks;
+    private int mines_already_determined;
     private volatile boolean force_stopped = false;
 
     private boolean check_temp_map_position_valid(int i, int j, boolean force_finished) {
@@ -669,6 +670,7 @@ public class MinesweeperState {
 
     private void initialize_get_predictions() {
         force_stopped = false;
+        mines_already_determined = 0;
         if (null == all_points) {
             all_points = new ArrayList<>();
         } else {
@@ -740,7 +742,11 @@ public class MinesweeperState {
             if (possibility_set.isEmpty()) {
                 return true;
             } else if (1 == possibility_set.size()) {
-                predictions.add(new Pair<>(point, possibility_set.iterator().next()));
+                char state = possibility_set.iterator().next();
+                predictions.add(new Pair<>(point, state));
+                if (MINE_FLAG == state) {
+                    ++mines_already_determined;
+                }
             }
         }
         return false;
@@ -771,7 +777,7 @@ public class MinesweeperState {
             initialize_temp_map();
             initialize_possibility_map(target_points);
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
-                if (search_iterative_unfinished(block, target_points_max_length, remaining_mines, all_blanks.size() - predictions.size(), all_blanks_included && 1 == blocks.size())) {
+                if (search_iterative_unfinished(block, target_points_max_length, remaining_mines - mines_already_determined, all_blanks.size() - predictions.size(), all_blanks_included && 1 == blocks.size())) {
                     return predictions;
                 }
                 if (summarize_predictions_failed(target_points, target_points_max_length, target_points_max_length + block.size(), predictions)) {
