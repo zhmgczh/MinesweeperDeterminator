@@ -605,7 +605,7 @@ public class MinesweeperState {
     private int[][] index_map;
 
     private ArrayList<ArrayList<Pair<Integer, Integer>>> get_blocks_raw() {
-        if (null == index_map) {
+        if (null == index_map || index_map.length != nrows || index_map[0].length != ncols) {
             index_map = new int[nrows][ncols];
         }
         for (int i = 0; i < all_points.size(); ++i) {
