@@ -212,9 +212,9 @@ public class MinesweeperState {
             int new_i = i + vector[0];
             int new_j = j + vector[1];
             if (new_i >= 0 && new_i < map.length && new_j >= 0 && new_j < map[0].length) {
-                if (MINE_FLAG == map[new_i][new_j]) {
+                if (MINE_FLAG == map[new_i][new_j] || MINE_EXPLODED == map[new_i][new_j] || MINE_UNFOUND == map[new_i][new_j]) {
                     ++mines;
-                } else if (is_unfinished_operand(map[new_i][new_j])) {
+                } else if (is_unfinished_operand(map[new_i][new_j]) || MINE_WRONGLY_FLAGGED == map[new_i][new_j]) {
                     ++blanks;
                 }
             }
