@@ -380,34 +380,24 @@ public class MinesweeperState {
         return true;
     }
 
-    private boolean check_temp_map_positions_valid(ArrayList<Pair<Integer, Integer>> all_points, int remaining_mines, boolean force_finished) {
-        if (force_finished && remaining_mines != 0) {
+    private boolean check_final_status_valid(int remaining_mines, int remaining_blanks, boolean force_finished) {
+        if (force_finished && (remaining_mines != 0 || remaining_blanks != 0)) {
             return false;
         }
-        for (Pair<Integer, Integer> point : all_points) {
-            if (!check_temp_map_position_valid(point.getFirst(), point.getSecond(), force_finished)) {
+        return 0 <= remaining_mines && remaining_mines <= remaining_blanks;
+    }
+
+    private boolean quick_set_and_check_valid(int point_index, ArrayList<Pair<Integer, Integer>> all_points, char state) {
+        for (int i = point_index; i < all_points.size(); ++i) {
+            Pair<Integer, Integer> point = all_points.get(i);
+            int point_x = point.getFirst();
+            int point_y = point.getSecond();
+            temp_map[point_x][point_y] = state;
+            if (!check_temp_map_position_valid(point_x, point_y, false)) {
                 return false;
             }
         }
-        int blanks = 0;
-        for (char[] chars : temp_map) {
-            for (char state : chars) {
-                if (is_unfinished_operand(state)) {
-                    if (force_finished) {
-                        return false;
-                    }
-                    ++blanks;
-                }
-            }
-        }
-        return 0 <= remaining_mines && remaining_mines <= blanks;
-    }
-
-    private void quick_set(int point_index, ArrayList<Pair<Integer, Integer>> all_points, char state) {
-        for (int i = point_index; i < all_points.size(); ++i) {
-            Pair<Integer, Integer> point = all_points.get(i);
-            temp_map[point.getFirst()][point.getSecond()] = state;
-        }
+        return true;
     }
 
     private void quick_reset(ArrayList<Pair<Integer, Integer>> all_points, int point_index) {
@@ -422,7 +412,7 @@ public class MinesweeperState {
             return;
         }
         if (point_index == all_points.size()) {
-            if (check_temp_map_positions_valid(all_points, remaining_mines, force_finished)) {
+            if (check_final_status_valid(remaining_mines, number_of_blanks - all_points.size(), force_finished)) {
                 for (int i = 0; i < all_points.size(); ++i) {
                     Pair<Integer, Integer> point = all_points.get(i);
                     possibility_map[base_offset + i].add(temp_map[point.getFirst()][point.getSecond()]);
@@ -430,12 +420,14 @@ public class MinesweeperState {
                 final_remaining_mines_possibilities.add(remaining_mines);
             }
         } else if (0 == remaining_mines) {
-            quick_set(point_index, all_points, ZERO);
-            search(all_points, base_offset, all_points.size(), 0, number_of_blanks, force_finished);
+            if (quick_set_and_check_valid(point_index, all_points, ZERO)) {
+                search(all_points, base_offset, all_points.size(), 0, number_of_blanks, force_finished);
+            }
             quick_reset(all_points, point_index);
         } else if (number_of_blanks - point_index == remaining_mines) {
-            quick_set(point_index, all_points, MINE_FLAG);
-            search(all_points, base_offset, all_points.size(), 0, number_of_blanks, force_finished);
+            if (quick_set_and_check_valid(point_index, all_points, MINE_FLAG)) {
+                search(all_points, base_offset, all_points.size(), 0, number_of_blanks, force_finished);
+            }
             quick_reset(all_points, point_index);
         } else {
             int x = all_points.get(point_index).getFirst();
@@ -472,7 +464,7 @@ public class MinesweeperState {
                     continue;
                 }
                 if (cur_point_index == all_points.size()) {
-                    if (check_temp_map_positions_valid(all_points, cur_remaining_mines, force_finished)) {
+                    if (check_final_status_valid(cur_remaining_mines, number_of_blanks - all_points.size(), force_finished)) {
                         for (int i = 0; i < all_points.size(); ++i) {
                             Pair<Integer, Integer> p = all_points.get(i);
                             possibility_map[base_offset + i].add(temp_map[p.getFirst()][p.getSecond()]);
@@ -483,21 +475,23 @@ public class MinesweeperState {
                     continue;
                 }
                 if (0 == cur_remaining_mines) {
-                    quick_set(cur_point_index, all_points, ZERO);
                     stack_stage[stack_pointer] = 1;
-                    ++stack_pointer;
-                    stack_point_index[stack_pointer] = all_points.size();
-                    stack_remaining_mines[stack_pointer] = 0;
-                    stack_stage[stack_pointer] = 0;
+                    if (quick_set_and_check_valid(cur_point_index, all_points, ZERO)) {
+                        ++stack_pointer;
+                        stack_point_index[stack_pointer] = all_points.size();
+                        stack_remaining_mines[stack_pointer] = 0;
+                        stack_stage[stack_pointer] = 0;
+                    }
                     continue;
                 }
                 if (number_of_blanks - cur_point_index == cur_remaining_mines) {
-                    quick_set(cur_point_index, all_points, MINE_FLAG);
                     stack_stage[stack_pointer] = 2;
-                    ++stack_pointer;
-                    stack_point_index[stack_pointer] = all_points.size();
-                    stack_remaining_mines[stack_pointer] = 0;
-                    stack_stage[stack_pointer] = 0;
+                    if (quick_set_and_check_valid(cur_point_index, all_points, MINE_FLAG)) {
+                        ++stack_pointer;
+                        stack_point_index[stack_pointer] = all_points.size();
+                        stack_remaining_mines[stack_pointer] = 0;
+                        stack_stage[stack_pointer] = 0;
+                    }
                     continue;
                 }
                 stack_x[stack_pointer] = all_points.get(cur_point_index).getFirst();
@@ -746,7 +740,7 @@ public class MinesweeperState {
             if (possibility_set.isEmpty()) {
                 return true;
             } else if (1 == possibility_set.size()) {
-                predictions.add(new Pair<>(point, (Character) possibility_set.toArray()[0]));
+                predictions.add(new Pair<>(point, possibility_set.iterator().next()));
             }
         }
         return false;
@@ -796,7 +790,7 @@ public class MinesweeperState {
                 }
             }
             if (!force_stopped && predictions.isEmpty() && 1 == final_remaining_mines_possibilities.size()) {
-                int final_remaining_mines = (int) final_remaining_mines_possibilities.toArray()[0];
+                int final_remaining_mines = final_remaining_mines_possibilities.iterator().next();
                 if (0 == final_remaining_mines) {
                     for (Pair<Integer, Integer> point : all_blanks) {
                         if (!prediction_tag[point.getFirst()][point.getSecond()]) {
