@@ -465,13 +465,31 @@ public class MinesweeperState {
         }
     }
 
+    private int[] stack_point_index;
+    private int[] stack_remaining_mines;
+    private int[] stack_stage;
+    private int[] stack_x;
+    private int[] stack_y;
+
+    private void initialize_search_stack(int max_depth) {
+        stack_point_index = new int[max_depth];
+        stack_remaining_mines = new int[max_depth];
+        stack_stage = new int[max_depth];
+        stack_x = new int[max_depth];
+        stack_y = new int[max_depth];
+    }
+
     private void search_iterative(ArrayList<Pair<Integer, Integer>> all_points, int base_offset, int remaining_mines, int number_of_blanks, boolean force_finished) {
-        int maxDepth = all_points.size() + 5;
-        int[] stack_point_index = new int[maxDepth];
-        int[] stack_remaining_mines = new int[maxDepth];
-        int[] stack_stage = new int[maxDepth];
-        int[] stack_x = new int[maxDepth];
-        int[] stack_y = new int[maxDepth];
+        int max_depth = all_points.size() + 1;
+        if (null == stack_point_index) {
+            initialize_search_stack(max_depth);
+        } else if (stack_point_index.length < max_depth) {
+            int length = stack_point_index.length;
+            while (length < max_depth) {
+                length <<= 1;
+            }
+            initialize_search_stack(length);
+        }
         int stack_pointer = 0;
         stack_point_index[stack_pointer] = 0;
         stack_remaining_mines[stack_pointer] = remaining_mines;
