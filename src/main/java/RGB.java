@@ -183,18 +183,21 @@ public class RGB {
         return false;
     }
 
-    private static int[] stack_x;
-    private static int[] stack_y;
+    private static final ThreadLocal<int[]> thread_stack_x = new ThreadLocal<>();
+    private static final ThreadLocal<int[]> thread_stack_y = new ThreadLocal<>();
 
     private static void initialize_stack(int area) {
+        int[] stack_x = thread_stack_x.get();
         if (null == stack_x || stack_x.length != area) {
-            stack_x = new int[area];
-            stack_y = new int[area];
+            thread_stack_x.set(new int[area]);
+            thread_stack_y.set(new int[area]);
         }
     }
 
     public static void dfs_equal_color(int[][][] map, boolean[][] past, ArrayList<int[]> block, int i, int j, int width_l, int width_r, int height_l, int height_r, int[][] colors) {
         initialize_stack((width_r - width_l) * (height_r - height_l));
+        int[] stack_x = thread_stack_x.get();
+        int[] stack_y = thread_stack_y.get();
         int stack_pointer = 0;
         stack_x[stack_pointer] = i;
         stack_y[stack_pointer] = j;
@@ -222,6 +225,8 @@ public class RGB {
 
     public static void dfs_similar_color(int[][][] map, boolean[][] past, ArrayList<int[]> block, int i, int j, int width_l, int width_r, int height_l, int height_r, int[][] colors, double threshold) {
         initialize_stack((width_r - width_l) * (height_r - height_l));
+        int[] stack_x = thread_stack_x.get();
+        int[] stack_y = thread_stack_y.get();
         int stack_pointer = 0;
         stack_x[stack_pointer] = i;
         stack_y[stack_pointer] = j;
