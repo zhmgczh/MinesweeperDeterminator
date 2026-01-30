@@ -187,16 +187,9 @@ public class RGB {
     private static int[] stack_y;
 
     private static void initialize_stack(int area) {
-        if (null == stack_x) {
+        if (null == stack_x || stack_x.length != area) {
             stack_x = new int[area];
             stack_y = new int[area];
-        } else if (stack_x.length < area) {
-            int length = stack_x.length;
-            while (length < area) {
-                length <<= 1;
-            }
-            stack_x = new int[length];
-            stack_y = new int[length];
         }
     }
 
