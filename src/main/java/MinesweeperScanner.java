@@ -25,13 +25,13 @@ public class MinesweeperScanner {
         ArrayList<ArrayList<int[]>> blocks = RGB.find_similar_color_blocks(screen.rgb_array, 0, screen.width, 0, screen.height, panel_background, 10);
         int max_area = 0;
         int width_l = 0, width_r = screen.width, height_l = 0, height_r = screen.height;
-        for (int i = 0; i < blocks.size(); ++i) {
+        for (ArrayList<int[]> block : blocks) {
             int w_l = Integer.MAX_VALUE, w_r = 0, h_l = Integer.MAX_VALUE, h_r = 0;
-            for (int j = 0; j < blocks.get(i).size(); ++j) {
-                w_l = Math.min(w_l, blocks.get(i).get(j)[0]);
-                w_r = Math.max(w_r, blocks.get(i).get(j)[0] + 1);
-                h_l = Math.min(h_l, blocks.get(i).get(j)[1]);
-                h_r = Math.max(h_r, blocks.get(i).get(j)[1] + 1);
+            for (int[] ints : block) {
+                w_l = Math.min(w_l, ints[0]);
+                w_r = Math.max(w_r, ints[0] + 1);
+                h_l = Math.min(h_l, ints[1]);
+                h_r = Math.max(h_r, ints[1] + 1);
             }
             int block_area = (w_r - w_l) * (h_r - h_l);
             if (max_area < block_area) {
@@ -45,7 +45,7 @@ public class MinesweeperScanner {
         return new int[]{width_l, width_r, height_l, height_r};
     }
 
-    public static int[] find_remaining_mines_and_time_coordinates(ScreenData screen, int panel_coordinates[]) {
+    public static int[] find_remaining_mines_and_time_coordinates(ScreenData screen, int[] panel_coordinates) {
         assert screen != null && panel_coordinates != null && panel_coordinates.length == 4;
         assert panel_coordinates[0] < panel_coordinates[1] && panel_coordinates[2] < panel_coordinates[3];
         ArrayList<ArrayList<int[]>> blocks = RGB.find_similar_color_blocks(screen.rgb_array, panel_coordinates[0], panel_coordinates[1], panel_coordinates[2], panel_coordinates[3], digits_boards_background, 50);
@@ -54,11 +54,11 @@ public class MinesweeperScanner {
         int width_l_2 = panel_coordinates[0], width_r_2 = panel_coordinates[1], height_l_2 = panel_coordinates[2], height_r_2 = panel_coordinates[3];
         for (ArrayList<int[]> block : blocks) {
             int w_l = Integer.MAX_VALUE, w_r = 0, h_l = Integer.MAX_VALUE, h_r = 0;
-            for (int j = 0; j < block.size(); ++j) {
-                w_l = Math.min(w_l, block.get(j)[0]);
-                w_r = Math.max(w_r, block.get(j)[0] + 1);
-                h_l = Math.min(h_l, block.get(j)[1]);
-                h_r = Math.max(h_r, block.get(j)[1] + 1);
+            for (int[] ints : block) {
+                w_l = Math.min(w_l, ints[0]);
+                w_r = Math.max(w_r, ints[0] + 1);
+                h_l = Math.min(h_l, ints[1]);
+                h_r = Math.max(h_r, ints[1] + 1);
             }
             int block_area = (w_r - w_l) * (h_r - h_l);
             if (max_area_2 < block_area) {
@@ -92,11 +92,11 @@ public class MinesweeperScanner {
         int width_l = 0, width_r = screen.width, height_l = 0, height_r = screen.height;
         for (ArrayList<int[]> block : blocks) {
             int w_l = Integer.MAX_VALUE, w_r = 0, h_l = Integer.MAX_VALUE, h_r = 0;
-            for (int j = 0; j < block.size(); ++j) {
-                w_l = Math.min(w_l, block.get(j)[0]);
-                w_r = Math.max(w_r, block.get(j)[0] + 1);
-                h_l = Math.min(h_l, block.get(j)[1]);
-                h_r = Math.max(h_r, block.get(j)[1] + 1);
+            for (int[] ints : block) {
+                w_l = Math.min(w_l, ints[0]);
+                w_r = Math.max(w_r, ints[0] + 1);
+                h_l = Math.min(h_l, ints[1]);
+                h_r = Math.max(h_r, ints[1] + 1);
             }
             int block_area = (w_r - w_l) * (h_r - h_l);
             if (block_area == (panel_coordinates[1] - panel_coordinates[0]) * (panel_coordinates[3] - panel_coordinates[2])) {
@@ -184,7 +184,7 @@ public class MinesweeperScanner {
         return sub_array;
     }
 
-    public static int[] get_grid_coordinates(int board_coordinates[], int grid_size[], int i, int j) {
+    public static int[] get_grid_coordinates(int[] board_coordinates, int[] grid_size, int i, int j) {
         int width_l = (int) Math.round(board_coordinates[0] + i * (board_coordinates[1] - board_coordinates[0]) / (double) grid_size[0]);
         int width_r = (int) Math.round(board_coordinates[0] + (i + 1) * (board_coordinates[1] - board_coordinates[0]) / (double) grid_size[0]);
         int height_l = (int) Math.round(board_coordinates[2] + j * (board_coordinates[3] - board_coordinates[2]) / (double) grid_size[1]);
@@ -205,7 +205,7 @@ public class MinesweeperScanner {
         return get_grid_coordinates(board_coordinates, grid_size, i, j);
     }
 
-    public char[][] get_map(ScreenData screen, int board_coordinates[], boolean debug) {
+    public char[][] get_map(ScreenData screen, int[] board_coordinates, boolean debug) {
         assert screen != null && MinesweeperState.images != null;
         assert 4 == board_coordinates.length;
         int[][][] board_rgb_array = extract_picture_slice(screen.rgb_array, board_coordinates[0], board_coordinates[1], board_coordinates[2], board_coordinates[3]);
@@ -248,12 +248,12 @@ public class MinesweeperScanner {
         return digits;
     }
 
-    public static int convert_digits_to_integer(int digits[]) {
+    public static int convert_digits_to_integer(int[] digits) {
         assert digits != null;
         int integer = 0;
-        for (int i = 0; i < digits.length; ++i) {
+        for (int digit : digits) {
             integer *= 10;
-            integer += digits[i];
+            integer += digit;
         }
         return integer;
     }
@@ -282,7 +282,10 @@ public class MinesweeperScanner {
     public static void main(String[] args) throws IllegalMapException {
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/empty.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/process.png");
-        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/hard.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/hard.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/hard2.png");
+//        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/hard3.png");
+        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/hard4.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/almost_final.png");
 //        ScreenData screen = ScreenCapture.load_screen_from_file("test_images/final.png");
         ScreenCapture.save_screen_to_file(screen, "Debug/captured_screen.png", "png");

@@ -447,7 +447,7 @@ public class MinesweeperState {
             quick_reset(all_points, point_index);
         } else if (number_of_blanks - point_index == remaining_mines) {
             if (quick_set_and_check_valid(all_points, point_index, MINE_FLAG)) {
-                search(all_points, base_offset, all_points.size(), 0, number_of_blanks, force_finished);
+                search(all_points, base_offset, all_points.size(), remaining_mines - (all_points.size() - point_index), number_of_blanks, force_finished);
             }
             quick_reset(all_points, point_index);
         } else {
@@ -528,7 +528,7 @@ public class MinesweeperState {
                     if (quick_set_and_check_valid(all_points, cur_point_index, MINE_FLAG)) {
                         ++stack_pointer;
                         stack_point_index[stack_pointer] = all_points.size();
-                        stack_remaining_mines[stack_pointer] = 0;
+                        stack_remaining_mines[stack_pointer] = cur_remaining_mines - (all_points.size() - cur_point_index);
                         stack_stage[stack_pointer] = 0;
                     }
                     continue;
@@ -810,26 +810,24 @@ public class MinesweeperState {
 //                return gaussian_predictions;
 //            }
             boolean all_blanks_included = all_points.size() == all_blanks.size();
-            ArrayList<Pair<Integer, Integer>> target_points = all_points;
             int target_points_max_length = 0;
             initialize_temp_map();
-            initialize_possibility_map(target_points);
+            initialize_possibility_map(all_points);
             for (ArrayList<Pair<Integer, Integer>> block : blocks) {
                 if (search_iterative_unfinished(block, target_points_max_length, remaining_mines - mines_already_determined, all_blanks.size() - predictions.size(), all_blanks_included && 1 == blocks.size())) {
                     return predictions;
                 }
-                if (summarize_predictions_failed(target_points, target_points_max_length, target_points_max_length + block.size(), predictions)) {
+                if (summarize_predictions_failed(all_points, target_points_max_length, target_points_max_length + block.size(), predictions)) {
                     return null;
                 }
                 target_points_max_length += block.size();
             }
             if (!force_stopped && blocks.size() != 1 && predictions.isEmpty()) {
-                target_points = all_points;
-                initialize_possibility_map(target_points);
-                if (search_iterative_unfinished(target_points, 0, remaining_mines, all_blanks.size(), all_blanks_included)) {
+                initialize_possibility_map(all_points);
+                if (search_iterative_unfinished(all_points, 0, remaining_mines, all_blanks.size(), all_blanks_included)) {
                     return predictions;
                 }
-                if (summarize_predictions_failed(target_points, 0, target_points_max_length, predictions)) {
+                if (summarize_predictions_failed(all_points, 0, target_points_max_length, predictions)) {
                     return null;
                 }
             }
