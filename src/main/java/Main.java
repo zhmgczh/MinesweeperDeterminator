@@ -501,6 +501,13 @@ public class Main {
         radio5.setFont(smallFont);
         JRadioButton radio6 = new JRadioButton("Custom");
         radio6.setFont(smallFont);
+        ButtonGroup group = new ButtonGroup();
+        group.add(radio1);
+        group.add(radio2);
+        group.add(radio3);
+        group.add(radio4);
+        group.add(radio5);
+        group.add(radio6);
         radio1.addActionListener(_ -> {
             width_textField.setEnabled(false);
             height_textField.setEnabled(false);
