@@ -582,8 +582,10 @@ public class Main {
         }
         JButton random_move_button = new JButton("Show one possible move randomly");
         random_move_button.setFont(smallFont);
+        random_move_button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         JButton all_moves_button = new JButton("Show all possible moves");
         all_moves_button.setFont(smallFont);
+        all_moves_button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         JPanel interval_inputPanel = new JPanel();
         JLabel interval_inputLabel = new JLabel("Interval: ");
         interval_inputLabel.setFont(smallFont);
@@ -598,6 +600,7 @@ public class Main {
         JButton autoplay_button = new JButton();
         initialize_autoplay_button(autoplay_button);
         autoplay_button.setFont(smallFont);
+        autoplay_button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         autoplay_button.setMaximumSize(new Dimension(autoplay_button.getPreferredSize().width, autoplay_button.getPreferredSize().height));
         JButton[] all_buttons = new JButton[]{random_move_button, all_moves_button, autoplay_button};
         random_move_button.addActionListener(_ -> {
