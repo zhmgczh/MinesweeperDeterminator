@@ -563,6 +563,22 @@ public class Main {
                         rb.doClick();
                     }
                 }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    if (rb.isEnabled()) {
+                        rb.getModel().setRollover(true);
+                        lbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    }
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    if (rb.isEnabled()) {
+                        rb.getModel().setRollover(false);
+                        lbl.setCursor(Cursor.getDefaultCursor());
+                    }
+                }
             });
             gbc.gridx = 0;
             radioGroupPanel.add(rb, gbc);
