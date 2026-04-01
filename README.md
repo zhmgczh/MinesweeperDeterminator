@@ -13,7 +13,7 @@ Currently, it only focuses on the fitness of the website [https://minesweeper-pr
 - 📷 **Screen Capture and Analysis**: Automatically captures and recognizes the current Minesweeper board state from the screen.
 - 💣 **Mine Counter Detection**: Identifies the number of remaining mines.
 - 🧠 **Guess Detection Logic**: Determines whether a guess is required to proceed.
-- ✅ **Safe Move Suggestion & Autoplay**: Provides a recommended move and clicks for you when logical deduction is possible.
+- ✅ **Safe Move Suggestion & Autoplay**: Provides all safe moves and clicks for you when logical deduction is possible.
 - ⚙️ **Cross-Platform (Java)**: Runs on any system with Java installed.
 
 ## Requirements
